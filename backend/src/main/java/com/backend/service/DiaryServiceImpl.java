@@ -1,16 +1,17 @@
 package com.backend.service;
 
-import com.jav.bluememories.domain.Diary;
-import com.jav.bluememories.domain.User;
-import com.jav.bluememories.dto.DiaryDto;
-import com.jav.bluememories.dto.SentimentResult;
-import com.jav.bluememories.repository.DiaryRepository;
-import com.jav.bluememories.repository.UserRepository;
+import com.backend.domain.Diary;
+import com.backend.domain.User;
+import com.backend.dto.DiaryDto;
+import com.backend.dto.SentimentResult;
+import com.backend.repository.DiaryRepository;
+import com.backend.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.YearMonth;
+import java.util.ArrayList;
 import java.util.List;
 @Service
 public class DiaryServiceImpl implements DiaryService {
@@ -91,4 +92,17 @@ public class DiaryServiceImpl implements DiaryService {
         LocalDate endDate = YearMonth.of(year, month).atEndOfMonth();
         return diaryRepository.findByUserAndDateBetween(user, startDate.toString(), endDate.toString());
     }
+
+    @Override
+    public List<DiaryDto> getDiariesByPublic() {
+        List<Diary> diaries = diaryRepository.findByIsPrivate(false);
+        List<DiaryDto> diaryDtos = new ArrayList<>();
+        for (Diary diary : diaries) {
+            DiaryDto dto = new DiaryDto(diary.getId(), diary.getTitle(), diary.getContent(), diary.getUser().getNickname());
+            diaryDtos.add(dto);
+        }
+
+        return diaryDtos;
+    }
+
 }

@@ -6,6 +6,7 @@ import MainPage from "./pages/main/Main";
 import Calendar from "./pages/main/Calendar";
 import WriteDiaryForm from "./pages/diary/WriteDiary";
 import DiaryPage from "./pages/diary/LoadDiary";
+import CommunityForm from "./pages/community/Community";
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
             <Route path="/calendar" element={<Calendar />} />
             <Route path="/write-diary" element={<WriteDiaryForm/>}/>
             <Route path="/view-diary" element={<DiaryPage/>}/>
+            <Route path="/community" element={<CommunityForm/>}/>
         </Routes>
       </BrowserRouter>
   );

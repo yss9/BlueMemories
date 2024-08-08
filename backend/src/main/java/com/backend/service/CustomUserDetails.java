@@ -1,6 +1,6 @@
 package com.backend.service;
 
-import com.jav.bluememories.domain.User;
+import com.backend.domain.User;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collection;

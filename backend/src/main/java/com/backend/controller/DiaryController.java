@@ -1,8 +1,8 @@
 package com.backend.controller;
 
-import com.jav.bluememories.domain.Diary;
-import com.jav.bluememories.dto.DiaryDto;
-import com.jav.bluememories.service.DiaryServiceImpl;
+import com.backend.domain.Diary;
+import com.backend.dto.DiaryDto;
+import com.backend.service.DiaryServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
@@ -39,5 +39,10 @@ public class DiaryController {
     public List<Diary> getDiariesByMonth(@PathVariable int year, @PathVariable int month) {
         String userId = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return diaryServiceImpl.getDiariesByMonth(userId, year, month);
+    }
+
+    @GetMapping("/diaries/users")
+    public List<DiaryDto> getDiariesByPublic(){
+        return diaryServiceImpl.getDiariesByPublic();
     }
 }

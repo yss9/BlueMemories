@@ -222,14 +222,13 @@ const WriteDiaryForm = () => {
                 weather,
                 date,
                 content,
-                is_private: !isToggled
+                isPrivate: !isToggled
             }, {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }
             });
 
-            console.log(response.data);
             // 성공 시 캘린더 페이지로 리다이렉트
             navigate('/calendar');
         } catch (error) {

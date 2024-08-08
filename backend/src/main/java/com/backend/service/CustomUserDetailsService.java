@@ -1,8 +1,7 @@
 package com.backend.service;
 
-import com.jav.bluememories.domain.User;
-import com.jav.bluememories.repository.UserRepository;
-import com.jav.bluememories.service.CustomUserDetails;
+import com.backend.domain.User;
+import com.backend.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;

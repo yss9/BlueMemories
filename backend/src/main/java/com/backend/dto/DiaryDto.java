@@ -1,6 +1,7 @@
 package com.backend.dto;
 
-import com.jav.bluememories.domain.Comment;
+
+import com.backend.domain.Comment;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -9,6 +10,7 @@ import java.util.List;
 @Getter
 @Setter
 public class DiaryDto {
+    private Long id;
     private String title;
     private String weather;
     private Boolean isPrivate;
@@ -24,4 +26,12 @@ public class DiaryDto {
     private String keyword4;
     private Integer likeNum;
     private List<Comment> comments;
+    private String nickname;
+
+    public DiaryDto(Long id, String title, String content, String nickname ) {
+        this.id = id;
+        this.title = title;
+        this.content = content;
+        this.nickname = nickname;
+    }
 }

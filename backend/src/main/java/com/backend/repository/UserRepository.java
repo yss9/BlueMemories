@@ -1,6 +1,6 @@
 package com.backend.repository;
 
-import com.jav.bluememories.domain.User;
+import com.backend.domain.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

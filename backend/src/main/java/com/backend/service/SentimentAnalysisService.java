@@ -1,6 +1,6 @@
 package com.backend.service;
 
-import com.jav.bluememories.dto.SentimentResult;
+import com.backend.dto.SentimentResult;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;

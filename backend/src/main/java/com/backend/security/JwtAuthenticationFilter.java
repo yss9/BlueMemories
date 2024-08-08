@@ -1,6 +1,6 @@
 package com.backend.security;
 
-import com.jav.bluememories.util.JwtUtil;
+import com.backend.util.JwtUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

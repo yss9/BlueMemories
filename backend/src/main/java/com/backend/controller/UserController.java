@@ -1,9 +1,10 @@
 package com.backend.controller;
 
-import com.jav.bluememories.domain.User;
-import com.jav.bluememories.dto.UserDTO;
-import com.jav.bluememories.service.UserService;
-import com.jav.bluememories.util.JwtUtil;
+
+import com.backend.domain.User;
+import com.backend.dto.UserDTO;
+import com.backend.service.UserService;
+import com.backend.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;

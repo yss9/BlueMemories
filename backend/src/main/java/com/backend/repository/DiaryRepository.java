@@ -1,7 +1,7 @@
 package com.backend.repository;
 
-import com.jav.bluememories.domain.Diary;
-import com.jav.bluememories.domain.User;
+import com.backend.domain.Diary;
+import com.backend.domain.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -14,4 +14,6 @@ public interface DiaryRepository extends JpaRepository<Diary, Long> {
     boolean existsByUserAndDate(User user, String date);
     Optional<Diary> findByUserAndDate(User user, String date);
     List<Diary> findByUserAndDateBetween(User user, String startDate, String endDate);
+
+    List<Diary> findByIsPrivate(Boolean isPrivate);
 }

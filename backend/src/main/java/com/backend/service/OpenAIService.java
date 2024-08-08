@@ -1,6 +1,6 @@
 package com.backend.service;// OpenAIService.java
-import com.jav.bluememories.dto.OpenAIRequest;
-import com.jav.bluememories.dto.OpenAIResponse;
+import com.backend.dto.OpenAIRequest;
+import com.backend.dto.OpenAIResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
