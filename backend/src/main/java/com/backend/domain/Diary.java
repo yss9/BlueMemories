@@ -60,4 +60,7 @@ public class Diary {
     private String keyword3;
     private String keyword4;
 
+    @Column(length = 2048)
+    private String imageUrl;
+
 }

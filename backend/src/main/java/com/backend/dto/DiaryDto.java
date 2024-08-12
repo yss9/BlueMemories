@@ -27,11 +27,13 @@ public class DiaryDto {
     private Integer likeNum;
     private List<Comment> comments;
     private String nickname;
+    private String imageUrl;
 
-    public DiaryDto(Long id, String title, String content, String nickname ) {
+    public DiaryDto(Long id, String title, String content, String nickname, String imageUrl ) {
         this.id = id;
         this.title = title;
         this.content = content;
         this.nickname = nickname;
+        this.imageUrl = imageUrl;
     }
 }

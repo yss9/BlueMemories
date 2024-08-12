@@ -86,7 +86,7 @@ const Nav = () => {
             <LeftLinks>
                 <Logo>Logo</Logo>
                 <NavLink style={{ marginLeft: "40px" }} to="/calendar">일기장</NavLink>
-                <NavLink to="/exchange">교환일기</NavLink>
+                <NavLink to="/shared-diary">교환일기</NavLink>
                 <NavLink to="/community">커뮤니티</NavLink>
                 <NavLink to="/profile">내정보</NavLink>
             </LeftLinks>

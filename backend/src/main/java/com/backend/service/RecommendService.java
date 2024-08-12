@@ -45,12 +45,12 @@ public class RecommendService {
         System.out.println("videoUrls = " + videoUrls);
 
         // 결과에 유튜브 동영상 URL 추가
-        if (videoUrls != null && !videoUrls.isEmpty()) {
-            results.addAll(videoUrls);
-        } else {
-            System.out.println("No videos found for the provided queries.");
-        }
+//        if (videoUrls != null && !videoUrls.isEmpty()) {
+//            results.addAll(videoUrls);
+//        } else {
+//            System.out.println("No videos found for the provided queries.");
+//        }
 
-        return results;
+        return videoUrls;
     }
 }

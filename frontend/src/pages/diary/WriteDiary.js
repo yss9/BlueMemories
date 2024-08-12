@@ -154,40 +154,6 @@ const Button = styled.button`
   font-family: Title;
 `;
 
-const rotate = keyframes`
-  0% { transform: translateX(0%); }
-  33% { transform: translateX(100%); }
-  66% { transform: translateX(200%); }
-  100% { transform: translateX(0%); }
-`;
-
-const LoadingOverlay = styled.div`
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(255, 255, 255, 0.8);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 24px;
-  color: #333;
-`;
-
-const ImageContainer = styled.div`
-  display: flex;
-  width: 150px;
-  height: 50px;
-  overflow: hidden;
-`;
-
-const AnimatedImage = styled.img`
-  width: 50px;
-  height: 50px;
-  animation: ${rotate} 1.5s linear infinite;
-`;
-
 const WriteDiaryForm = () => {
     const location = useLocation();
     const navigate = useNavigate();
@@ -197,6 +163,7 @@ const WriteDiaryForm = () => {
     const [content, setContent] = useState('');
     const [isToggled, setIsToggled] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+    const [image, setImage] = useState(null);
 
     useEffect(() => {
         if (location.state && location.state.date) {
@@ -208,23 +175,33 @@ const WriteDiaryForm = () => {
         setIsToggled(!isToggled);
     };
 
-    const handleGoCalendar = () => {
-        navigate('/calendar');
+    const handleImageChange = (e) => {
+        setImage(e.target.files[0]);
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setIsLoading(true); // 저장 시작 시 로딩 상태 true 설정
         const token = Cookies.get('token');
+
+        const formData = new FormData();
+        formData.append('diary', new Blob([JSON.stringify({
+            title,
+            weather,
+            date,
+            content,
+            isPrivate: !isToggled
+        })], {
+            type: "application/json"
+        }));
+        if (image) {
+            formData.append('image', image);
+        }
+
         try {
-            const response = await axios.post('/api/diaries', {
-                title,
-                weather,
-                date,
-                content,
-                isPrivate: !isToggled
-            }, {
+            await axios.post('/api/diaries', formData, {
                 headers: {
+                    'Content-Type': 'multipart/form-data',
                     Authorization: `Bearer ${token}`
                 }
             });
@@ -275,6 +252,7 @@ const WriteDiaryForm = () => {
                     </TwoColumnContainer>
                     <LargeInput value={content} onChange={(e) => setContent(e.target.value)} placeholder="본문" />
                     <ButtonContainer style={{ float: "left" }}>
+                        <input type="file" onChange={handleImageChange} />
                         <Button style={{ width: "120px", height: "35px", fontSize: "18px" }}>사진 첨부하기</Button>
                     </ButtonContainer>
                 </Container>

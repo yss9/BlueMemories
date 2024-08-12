@@ -27,7 +27,7 @@ public class SharedDiaryContent {
     private LocalDateTime createdAt;
 
     @ManyToOne
-    @JoinColumn(name = "shared_diary_id", nullable = true)
+    @JoinColumn(name = "shared_diary_id")
     private SharedDiary sharedDiary;
 
     @OneToMany(mappedBy = "sharedDiaryContent", cascade = CascadeType.ALL, orphanRemoval = true)

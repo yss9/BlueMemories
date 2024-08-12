@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Cookies from 'js-cookie';
+import Nav from "../nav/Nav";
 
 const CommunityForm = () => {
     const [diaries, setDiaries] = useState([]);
@@ -26,6 +27,7 @@ const CommunityForm = () => {
 
     return (
         <div>
+            <Nav/>
             <h1>커뮤니티</h1>
             <h2>다른 사람들은 어떤 일기를 쓸까요?
                 사람들의 일기를 구경하고 좋아요와 댓글을 남겨보세요!</h2>

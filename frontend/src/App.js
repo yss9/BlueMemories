@@ -7,6 +7,7 @@ import Calendar from "./pages/main/Calendar";
 import WriteDiaryForm from "./pages/diary/WriteDiary";
 import DiaryPage from "./pages/diary/LoadDiary";
 import CommunityForm from "./pages/community/Community";
+import SharedDiaryPage from "./pages/sharedDiary/SharedDiary";
 
 function App() {
   return (
@@ -14,11 +15,12 @@ function App() {
         <Routes>
             <Route path="/signup" element={<SignUp/>} />
             <Route path="/signin" element={<SignIn/>} />
-            <Route path="/main" element={<MainPage/>}/>
+            <Route path="/" element={<MainPage/>}/>
             <Route path="/calendar" element={<Calendar />} />
             <Route path="/write-diary" element={<WriteDiaryForm/>}/>
             <Route path="/view-diary" element={<DiaryPage/>}/>
             <Route path="/community" element={<CommunityForm/>}/>
+            <Route path="/shared-diary" element={<SharedDiaryPage/>}/>
         </Routes>
       </BrowserRouter>
   );

@@ -7,7 +7,7 @@ import lombok.Setter;
 @Entity
 @Getter
 @Setter
-public class SharedDiaryApplicationList {
+public class SharedDiaryApplication {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -18,6 +18,13 @@ public class SharedDiaryApplicationList {
     private SharedDiary sharedDiary;
 
     @ManyToOne
-    @JoinColumn(name = "user_id")
-    private User user;
+    @JoinColumn(name = "sender")
+    private User sender;
+
+    @ManyToOne
+    @JoinColumn(name = "receiver")
+    private User receiver;
+
+
+
 }

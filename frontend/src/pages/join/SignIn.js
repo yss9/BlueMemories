@@ -88,7 +88,7 @@ const SignInForm = () => {
             Cookies.set('token', token); // JWT 토큰을 쿠키에 저장
             console.log(token)
             alert('로그인 성공');
-            navigate('/main'); // 로그인 후 이동할 페이지
+            navigate('/'); // 로그인 후 이동할 페이지
         } catch (error) {
             setErrorMessage('로그인 실패: 아이디 또는 비밀번호를 확인하세요.');
         }

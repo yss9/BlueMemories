@@ -8,7 +8,9 @@ import com.backend.repository.DiaryRepository;
 import com.backend.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.ArrayList;
@@ -28,8 +30,12 @@ public class DiaryServiceImpl implements DiaryService {
     @Autowired
     private RecommendService recommendService;
 
+    @Autowired
+    private S3Service s3Service;
+
+
     @Override
-    public Diary createDiary(DiaryDto diaryDto, String userId) {
+    public Diary createDiary(DiaryDto diaryDto, String userId, MultipartFile imageFile) {
         User user = userRepository.findByUserId(userId);
         if (user == null) {
             throw new RuntimeException("User not found");
@@ -60,6 +66,16 @@ public class DiaryServiceImpl implements DiaryService {
         diary.setKeyword2(recommendations.get(1));
         diary.setKeyword3(recommendations.get(2));
         diary.setKeyword4(recommendations.get(3));
+
+        // 이미지 업로드 및 URL 설정
+        if (imageFile != null && !imageFile.isEmpty()) {
+            try {
+                String imageUrl = s3Service.uploadFile(imageFile);
+                diary.setImageUrl(imageUrl);
+            } catch (IOException e) {
+                throw new RuntimeException("Failed to upload image", e);
+            }
+        }
 
         return diaryRepository.save(diary);
     }
@@ -98,7 +114,7 @@ public class DiaryServiceImpl implements DiaryService {
         List<Diary> diaries = diaryRepository.findByIsPrivate(false);
         List<DiaryDto> diaryDtos = new ArrayList<>();
         for (Diary diary : diaries) {
-            DiaryDto dto = new DiaryDto(diary.getId(), diary.getTitle(), diary.getContent(), diary.getUser().getNickname());
+            DiaryDto dto = new DiaryDto(diary.getId(), diary.getTitle(), diary.getContent(), diary.getUser().getNickname(),diary.getImageUrl());
             diaryDtos.add(dto);
         }
 
