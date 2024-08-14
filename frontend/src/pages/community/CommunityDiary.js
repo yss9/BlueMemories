@@ -5,9 +5,9 @@ import Nav from "../nav/Nav";
 import backgroundImage from '../images/background.png';
 import Cookies from "js-cookie";
 import axios from "axios";
-import happyImage from './images/happy.png';
-import neutralImage from './images/neutral.png';
-import sadImage from './images/sad.png';
+import happyImage from '../images/happy.png';
+import neutralImage from '../images/neutral.png';
+import sadImage from '../images/sad.png';
 import YouTube from 'react-youtube';
 
 const BackGround = styled.div`
@@ -158,9 +158,9 @@ const CommentItem = styled.div`
   font-family: Content;
 `;
 
-const DiaryPage = () => {
+const CommunityDiaryPage = () => {
     const location = useLocation();
-    const { date, id } = location.state;
+    const { id } = location.state;
     const [diary, setDiary] = useState(null);
     const [nickname, setNickname] = useState('');
     const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
@@ -171,7 +171,7 @@ const DiaryPage = () => {
         const token = Cookies.get('token');
 
         // Fetch diary by date
-        axios.get(`/api/diary/${date}`, {
+        axios.get(`/api/get-diary/${id}`, {
             headers: {
                 Authorization: `Bearer ${token}`,
             },
@@ -208,7 +208,7 @@ const DiaryPage = () => {
             .catch((error) => {
                 console.error('Failed to fetch comments:', error);
             });
-    }, [date]);
+    }, [id]);
 
     const handleRefresh = () => {
         if (diary) {
@@ -284,7 +284,7 @@ const DiaryPage = () => {
                     </ElementDiv>
                 </div>
                 <div style={{width: '100%', height: '20px'}}>
-                    <NicknameBox>{nickname}님의 일기</NicknameBox>
+                    <NicknameBox>{diary.nickname}님의 일기</NicknameBox>
                 </div>
                 <div style={{width: '100%', height: '30px', marginTop: '30px'}}>
                     <label style={{fontFamily: 'Title', fontSize: '40px'}}>{title}</label>
@@ -294,7 +294,7 @@ const DiaryPage = () => {
                     <div style={{marginLeft: '30px', fontFamily: 'Content', fontSize: '18px'}}>{weather}</div>
                     <div style={{float: 'right', marginRight: '150px'}}>
                         <div>날짜</div>
-                        <div style={{marginLeft: '30px', fontFamily: 'Content', fontSize: '18px'}}>{date}</div>
+                        <div style={{marginLeft: '30px', fontFamily: 'Content', fontSize: '18px'}}>{diary.date}</div>
                     </div>
                 </StateBox>
                 <ContentContainer hasImage={Boolean(imageUrl)}>
@@ -347,4 +347,4 @@ const DiaryPage = () => {
         </BackGround>
     );
 }
-export default DiaryPage;
+export default CommunityDiaryPage;

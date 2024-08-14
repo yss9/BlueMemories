@@ -8,6 +8,7 @@ import WriteDiaryForm from "./pages/diary/WriteDiary";
 import DiaryPage from "./pages/diary/LoadDiary";
 import CommunityForm from "./pages/community/Community";
 import SharedDiaryPage from "./pages/sharedDiary/SharedDiary";
+import CommunityDiaryPage from "./pages/community/CommunityDiary";
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
             <Route path="/view-diary" element={<DiaryPage/>}/>
             <Route path="/community" element={<CommunityForm/>}/>
             <Route path="/shared-diary" element={<SharedDiaryPage/>}/>
+            <Route path="/community-diary" element={<CommunityDiaryPage/>}/>
         </Routes>
       </BrowserRouter>
   );

@@ -17,7 +17,6 @@ const moodImages = {
     normal: normalImage
 };
 
-
 const Container = styled.div`
   padding-top: 40px;
   text-align: center;
@@ -73,7 +72,7 @@ const DayTile = styled.div`
   position: relative;
   background-image: ${props => `url(${props.moodImage || moodImages.normal})`};
   background-size: cover;
-  background-position: center; /* 추가 */
+  background-position: center;
   border-radius: 25px;
   color: ${props => (props.isWeekend ? (props.isSunday ? 'rgba(159, 0, 0, 1)' : 'rgba(4, 0, 179, 1)') : 'rgba(0, 0, 0, 1)')};
   font-size: 25px;
@@ -129,8 +128,9 @@ const Calendar = () => {
                     Authorization: `Bearer ${token}`
                 }
             });
-            const entries = response.data.reduce((acc, diary) => {
-                acc[diary.date] = diary;
+
+            const entries = response.data.reduce((acc, { id, date, sentiment }) => {
+                acc[date] = { id, sentiment };  // id와 sentiment 모두 저장
                 return acc;
             }, {});
             setDiaryEntries(entries);
@@ -157,15 +157,22 @@ const Calendar = () => {
         setCurrentDate(setMonth(currentDate, newMonth));
     };
 
-    const handleDayClick = async (day) => {
+    const handleDayClick = (day) => {
         const formattedDate = format(day, 'yyyy-MM-dd');
-        const exists = await checkDiaryExists(formattedDate);
-        if (exists === "exist") {
-            const diary = await fetchDiary(formattedDate);
-            navigate(`/view-diary`, { state: { diary } });
+        const entry = diaryEntries[formattedDate];
+        if (entry) {
+            navigate(`/view-diary`, { state: { id: entry.id, date: formattedDate } });
         } else {
             navigate(`/write-diary`, { state: { date: formattedDate } });
         }
+    };
+
+    const renderWeekdays = () => {
+        return weekdays.map((day, index) => (
+            <WeekdayTile key={index} isWeekend={index === 0 || index === 6} isSunday={index === 0}>
+                {day}
+            </WeekdayTile>
+        ));
     };
 
     const renderDays = () => {
@@ -203,40 +210,6 @@ const Calendar = () => {
         }
 
         return days;
-    };
-
-    const renderWeekdays = () => {
-        return weekdays.map((day, index) => <WeekdayTile key={index} isWeekend={index === 0 || index === 6}>{day}</WeekdayTile>);
-    };
-
-    const checkDiaryExists = async (date) => {
-        try {
-            const token = Cookies.get('token');
-            const response = await axios.get(`/api/check/${date}`, {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
-            });
-            return response.data; // "exist" or "don't_exist"
-        } catch (error) {
-            console.error("Failed to check diary existence:", error);
-            return "don't_exist";
-        }
-    };
-
-    const fetchDiary = async (date) => {
-        try {
-            const token = Cookies.get('token');
-            const response = await axios.get(`/api/diary/${date}`, {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
-            });
-            return response.data;
-        } catch (error) {
-            console.error("Failed to fetch diary:", error);
-            return null;
-        }
     };
 
     return (

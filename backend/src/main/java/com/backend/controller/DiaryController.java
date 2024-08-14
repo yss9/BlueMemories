@@ -2,6 +2,7 @@ package com.backend.controller;
 
 import com.backend.domain.Diary;
 import com.backend.dto.DiaryDto;
+import com.backend.dto.DiarySentimentDto;
 import com.backend.service.DiaryServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -32,13 +33,18 @@ public class DiaryController {
     }
 
     @GetMapping("/diary/{date}")
-    public Diary getDiaryByDate(@PathVariable String date) {
+    public DiaryDto getDiaryByDate(@PathVariable String date) {
         String userId = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return diaryServiceImpl.getDiaryByDate(userId, date);
     }
 
+    @GetMapping("/get-diary/{id}")
+    public DiaryDto getDiaryById(@PathVariable Long id){
+        return diaryServiceImpl.getDiaryById(id);
+    }
+
     @GetMapping("/diaries/{year}/{month}")
-    public List<Diary> getDiariesByMonth(@PathVariable int year, @PathVariable int month) {
+    public List<DiarySentimentDto> getDiariesByMonth(@PathVariable int year, @PathVariable int month) {
         String userId = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return diaryServiceImpl.getDiariesByMonth(userId, year, month);
     }

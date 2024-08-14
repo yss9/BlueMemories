@@ -3,6 +3,7 @@ package com.backend.service;
 import com.backend.domain.Diary;
 import com.backend.domain.User;
 import com.backend.dto.DiaryDto;
+import com.backend.dto.DiarySentimentDto;
 import com.backend.dto.SentimentResult;
 import com.backend.repository.DiaryRepository;
 import com.backend.repository.UserRepository;
@@ -15,6 +16,9 @@ import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
 @Service
 public class DiaryServiceImpl implements DiaryService {
 
@@ -90,23 +94,51 @@ public class DiaryServiceImpl implements DiaryService {
     }
 
     @Override
-    public Diary getDiaryByDate(String userId, String date) {
+    public DiaryDto getDiaryByDate(String userId, String date) {
         User user = userRepository.findByUserId(userId);
         if (user == null) {
             throw new RuntimeException("User not found");
         }
-        return diaryRepository.findByUserAndDate(user, date).orElse(null);
+
+        Diary diary = diaryRepository.findByUserAndDate(user, date).orElse(null);
+        if (diary == null) {
+            throw new RuntimeException("Diary not found");
+        }
+
+        // Diary를 DiaryDto로 변환
+        DiaryDto diaryDto = new DiaryDto(
+                diary.getId(),
+                diary.getTitle(),
+                diary.getContent(),
+                diary.getUser().getNickname(),
+                diary.getImageUrl()
+        );
+        diaryDto.setDate(diary.getDate());
+        diaryDto.setWeather(diary.getWeather());
+        diaryDto.setConfidence(String.valueOf(diary.getSentiment()));
+        diaryDto.setNegative(diary.getConfidenceNegative());
+        diaryDto.setPositive(diary.getConfidencePositive());
+        diaryDto.setNeutral(diary.getConfidenceNeutral());
+        diaryDto.setKeyword1(diary.getKeyword1());
+        diaryDto.setKeyword2(diary.getKeyword2());
+        diaryDto.setKeyword3(diary.getKeyword3());
+        diaryDto.setKeyword4(diary.getKeyword4());
+        diaryDto.setLikeNum(diary.getLikeNum());
+
+        return diaryDto;
     }
 
-    @Override
-    public List<Diary> getDiariesByMonth(String userId, int year, int month) {
+    public List<DiarySentimentDto> getDiariesByMonth(String userId, int year, int month) {
         User user = userRepository.findByUserId(userId);
         if (user == null) {
             throw new RuntimeException("User not found");
         }
         LocalDate startDate = YearMonth.of(year, month).atDay(1);
         LocalDate endDate = YearMonth.of(year, month).atEndOfMonth();
-        return diaryRepository.findByUserAndDateBetween(user, startDate.toString(), endDate.toString());
+        return diaryRepository.findByUserAndDateBetween(user, startDate.toString(), endDate.toString())
+                .stream()
+                .map(diary -> new DiarySentimentDto(diary.getId(),diary.getDate(), diary.getSentiment()))
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -119,6 +151,31 @@ public class DiaryServiceImpl implements DiaryService {
         }
 
         return diaryDtos;
+    }
+
+    public DiaryDto getDiaryById(Long id){
+        Optional<Diary> diaryOptional = diaryRepository.findById(id);
+        Diary diary = diaryOptional.get();
+        DiaryDto diaryDto = new DiaryDto(
+                diary.getId(),
+                diary.getTitle(),
+                diary.getContent(),
+                diary.getUser().getNickname(),
+                diary.getImageUrl()
+        );
+        diaryDto.setDate(diary.getDate());
+        diaryDto.setWeather(diary.getWeather());
+        diaryDto.setConfidence(String.valueOf(diary.getSentiment()));
+        diaryDto.setNegative(diary.getConfidenceNegative());
+        diaryDto.setPositive(diary.getConfidencePositive());
+        diaryDto.setNeutral(diary.getConfidenceNeutral());
+        diaryDto.setKeyword1(diary.getKeyword1());
+        diaryDto.setKeyword2(diary.getKeyword2());
+        diaryDto.setKeyword3(diary.getKeyword3());
+        diaryDto.setKeyword4(diary.getKeyword4());
+        diaryDto.setLikeNum(diary.getLikeNum());
+
+        return diaryDto;
     }
 
 }

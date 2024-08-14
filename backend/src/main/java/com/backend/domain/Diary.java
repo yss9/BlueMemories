@@ -49,12 +49,6 @@ public class Diary {
     private Double confidenceNeutral;
     private Double confidencePositive;
 
-    // 추천 결과 필드
-    @ElementCollection
-    @CollectionTable(name = "diary_recommendations", joinColumns = @JoinColumn(name = "diary_id"))
-    @Column(name = "recommendation")
-    private Set<String> recommendations;
-
     private String keyword1;
     private String keyword2;
     private String keyword3;

@@ -35,5 +35,6 @@ public class DiaryDto {
         this.content = content;
         this.nickname = nickname;
         this.imageUrl = imageUrl;
+
     }
 }

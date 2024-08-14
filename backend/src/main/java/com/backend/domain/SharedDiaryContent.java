@@ -20,7 +20,11 @@ public class SharedDiaryContent {
     @Column(length = 1000)
     private String content;
 
+    private String title;
+
     private String weather;
+
+    private String date;
 
     @CreationTimestamp
     @Column(name = "created_at")
@@ -36,5 +40,19 @@ public class SharedDiaryContent {
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
+
+
+    private String sentiment;
+    private Double confidenceNegative;
+    private Double confidenceNeutral;
+    private Double confidencePositive;
+
+    private String keyword1;
+    private String keyword2;
+    private String keyword3;
+    private String keyword4;
+
+    @Column(length = 2048)
+    private String imageUrl;
 
 }
