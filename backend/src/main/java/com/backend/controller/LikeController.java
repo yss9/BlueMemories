@@ -23,7 +23,6 @@ public class LikeController {
     @PostMapping("/push-like")
     public boolean pushLikeDiary(@RequestBody LikeDto diaryId){
         String userId = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        System.out.println("LikeController.pushLikeDiary");
         return likeService.pushLikeDiary(diaryId.getDiaryId(), userId);
     }
 
