@@ -66,7 +66,8 @@ const ContentContainer = styled.div`
   flex-direction: ${(props) => (props.hasImage ? 'row' : 'column')};
   gap: 20px;
   margin-top: 50px;
-  height: 400px;
+  min-height: 300px;
+  max-height: 800px;
 `;
 
 const ImageWrapper = styled.div`
@@ -138,7 +139,30 @@ const CommentContainer = styled.div`
   }
 `;
 
-const DiaryInfoBox = styled.div``;
+const CommentWriteButton = styled.button`
+    background-color: rgba(94, 120, 100, 1);
+  border: none;
+  border-radius: 5px;
+  width: 60px;
+  height: 25px;
+  font-family: Content;
+  font-size: 14px;
+  margin-left: 78%;
+  margin-top: -30px;
+  color: white;
+  z-index: 2;
+  position: absolute;
+  cursor: pointer;
+`;
+
+const CommentNicknameBox = styled.label`
+    background-color: white;
+  border: 2px solid rgba(94, 120, 100, 1);
+  border-radius: 15px;
+  padding: 3px 15px;
+  font-family: Title;
+  
+`;
 
 const CommentInputBox = styled.textarea`
   background-color: rgba(255, 255, 255, 1);
@@ -149,11 +173,15 @@ const CommentInputBox = styled.textarea`
   text-align: left;
   vertical-align: top;
   padding: 20px;
+  resize: none;
+  font-family: Content;
 `;
 
 const DiaryCommentBox = styled.div``;
 
+
 const CommentItem = styled.div`
+  margin-top:40px;
   margin-bottom: 20px;
   font-family: Content;
 `;
@@ -324,25 +352,27 @@ const DiaryPage = () => {
                     <YouTube videoId={keywords[currentVideoIndex]}/>
                 </VideoContainer>
                 <RefreshButton onClick={handleRefresh}>새로운 동영상 추천 받기</RefreshButton>
-                <CommentContainer>
-                    <DiaryInfoBox>
-                        <p>( ) 좋아요 {likeNum}</p>
-                        <p>( ) 댓글 {comments.length}</p>
-                    </DiaryInfoBox>
-                    <CommentInputBox
-                        value={newComment}
-                        onChange={(e) => setNewComment(e.target.value)}
-                        placeholder="댓글을 남겨보세요"
-                    />
-                    <button onClick={handleCommentSubmit}>댓글 작성</button>
-                    <DiaryCommentBox>
-                        {comments.map((comment, index) => (
-                            <CommentItem key={index}>
-                                <strong>{comment.nickname}:</strong> {comment.content}
-                            </CommentItem>
-                        ))}
-                    </DiaryCommentBox>
-                </CommentContainer>
+                {/*<CommentContainer>*/}
+                {/*    <div>*/}
+                {/*        <p>( ) 좋아요 {likeNum}</p>*/}
+                {/*        <p>( ) 댓글 {comments.length}</p>*/}
+                {/*    </div>*/}
+                {/*    <CommentInputBox*/}
+                {/*        value={newComment}*/}
+                {/*        onChange={(e) => setNewComment(e.target.value)}*/}
+                {/*        placeholder="댓글을 남겨보세요"*/}
+                {/*    />*/}
+                {/*    <CommentWriteButton onClick={handleCommentSubmit}>등록</CommentWriteButton>*/}
+                {/*    <DiaryCommentBox>*/}
+                {/*        {comments.map((comment, index) => (*/}
+                {/*            <CommentItem key={index}>*/}
+                {/*                <CommentNicknameBox>{comment.nickname}</CommentNicknameBox>*/}
+                {/*                <div style={{marginLeft:"30px", marginTop:"20px"}}>{comment.content}</div>*/}
+                {/*                <hr style={{width:"650px", marginTop:"27px", backgroundColor:"rgba(94, 120, 100, 0.8)"}}/>*/}
+                {/*            </CommentItem>*/}
+                {/*        ))}*/}
+                {/*    </DiaryCommentBox>*/}
+                {/*</CommentContainer>*/}
             </Container>
         </BackGround>
     );

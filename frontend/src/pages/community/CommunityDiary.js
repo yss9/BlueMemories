@@ -5,10 +5,12 @@ import Nav from "../nav/Nav";
 import backgroundImage from '../images/background.png';
 import Cookies from "js-cookie";
 import axios from "axios";
-import happyImage from '../images/happy.png';
-import neutralImage from '../images/neutral.png';
-import sadImage from '../images/sad.png';
+import happyImage from '../diary/images/happy.png';
+import neutralImage from '../diary/images/neutral.png';
+import sadImage from '../diary/images/sad.png';
 import YouTube from 'react-youtube';
+import likeImage from '../images/likebutton.png';
+import commentImage from '../images/commentbutton.png';
 
 const BackGround = styled.div`
   background-image: url(${backgroundImage});
@@ -66,7 +68,8 @@ const ContentContainer = styled.div`
   flex-direction: ${(props) => (props.hasImage ? 'row' : 'column')};
   gap: 20px;
   margin-top: 50px;
-  height: 400px;
+  min-height: 300px;
+  max-height: 600px;
 `;
 
 const ImageWrapper = styled.div`
@@ -149,14 +152,71 @@ const CommentInputBox = styled.textarea`
   text-align: left;
   vertical-align: top;
   padding: 20px;
+  resize: none;
 `;
 
-const DiaryCommentBox = styled.div``;
+const DiaryCommentBox = styled.div`
+  margin-top: 40px;
+`;
 
 const CommentItem = styled.div`
   margin-bottom: 20px;
   font-family: Content;
 `;
+
+const CommentWriteButton = styled.button`
+    background-color: rgba(94, 120, 100, 1);
+  border: none;
+  border-radius: 5px;
+  width: 60px;
+  height: 25px;
+  font-family: Content;
+  font-size: 14px;
+  margin-left: 78%;
+  margin-top: -30px;
+  color: white;
+  z-index: 2;
+  position: absolute;
+  cursor: pointer;
+`;
+
+const CommentNicknameBox = styled.label`
+    background-color: white;
+  border: 2px solid rgba(94, 120, 100, 1);
+  border-radius: 15px;
+  padding: 3px 15px;
+  font-family: Title;
+  
+`;
+
+const LikeButtonDiv = styled.div`
+  cursor: pointer;
+  width: 70px;
+  height: 25px;
+  display: inline-block;
+  font-family: Title;
+  padding-left: 35px;
+  font-size: 20px;
+  line-height: 1.4;
+  margin-right: 10px;
+  background: no-repeat;
+  background-image: url("${likeImage}");
+`;
+
+const CommentButtonDiv = styled.div`
+  width: 70px;
+  height: 25px;
+  display: inline-block;
+  font-family: Title;
+  padding-left: 35px;
+  font-size: 22px;
+  line-height: 1.3;
+  margin-right: 10px;
+  background: no-repeat;
+  background-image: url("${commentImage}");
+`;
+
+
 
 const CommunityDiaryPage = () => {
     const location = useLocation();
@@ -166,6 +226,7 @@ const CommunityDiaryPage = () => {
     const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
     const [comments, setComments] = useState([]);
     const [newComment, setNewComment] = useState('');
+    const [isLike, setIsLike] = useState(false);
 
     useEffect(() => {
         const token = Cookies.get('token');
@@ -178,6 +239,18 @@ const CommunityDiaryPage = () => {
         })
             .then((response) => {
                 setDiary(response.data);
+            })
+            .catch((error) => {
+                console.error('Failed to fetch diary:', error);
+            });
+
+        axios.get(`/api/get-like/${id}`, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        })
+            .then((response) => {
+                setIsLike(response.data);
             })
             .catch((error) => {
                 console.error('Failed to fetch diary:', error);
@@ -258,6 +331,23 @@ const CommunityDiaryPage = () => {
     }
 
     const keywords = [keyword1, keyword2, keyword3, keyword4];
+    const handleLikeSubmit = () => {
+        try {
+            const token = Cookies.get('token');
+            const response = axios.post('/api/push-like', {
+                diaryId: id
+            }, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+            window.location.reload(); // 페이지 새로고침
+        } catch (error) {
+            console.error("Failed to post comment: ", error);
+        }
+    };
+
+
 
     return (
         <BackGround>
@@ -325,20 +415,22 @@ const CommunityDiaryPage = () => {
                 </VideoContainer>
                 <RefreshButton onClick={handleRefresh}>새로운 동영상 추천 받기</RefreshButton>
                 <CommentContainer>
-                    <DiaryInfoBox>
-                        <p>( ) 좋아요 {likeNum}</p>
-                        <p>( ) 댓글 {comments.length}</p>
-                    </DiaryInfoBox>
+                    <div style={{marginBottom:"20px"}}>
+                        <LikeButtonDiv onClick={handleLikeSubmit}>좋아요 &nbsp;{likeNum}</LikeButtonDiv>
+                        <CommentButtonDiv>댓글 &nbsp;{comments.length}</CommentButtonDiv>
+                    </div>
                     <CommentInputBox
                         value={newComment}
                         onChange={(e) => setNewComment(e.target.value)}
                         placeholder="댓글을 남겨보세요"
                     />
-                    <button onClick={handleCommentSubmit}>댓글 작성</button>
+                    <CommentWriteButton onClick={handleCommentSubmit}>등록</CommentWriteButton>
                     <DiaryCommentBox>
                         {comments.map((comment, index) => (
                             <CommentItem key={index}>
-                                <strong>{comment.nickname}:</strong> {comment.content}
+                                <CommentNicknameBox>{comment.nickname}</CommentNicknameBox>
+                                <div style={{marginLeft:"30px", marginTop:"20px"}}>{comment.content}</div>
+                                <hr style={{width:"650px", marginTop:"27px", backgroundColor:"rgba(94, 120, 100, 0.8)"}}/>
                             </CommentItem>
                         ))}
                     </DiaryCommentBox>

@@ -21,6 +21,8 @@ public class SharedDiary {
 
     private String title;
 
+    private int coverImage;
+
     @CreationTimestamp
     @Column(name = "created_at")
     private LocalDateTime createdAt;
