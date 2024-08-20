@@ -9,7 +9,7 @@ import com.backend.domain.SharedDiaryUser;
 import com.backend.domain.User;
 import com.backend.dto.DiaryDto;
 import com.backend.dto.SentimentResult;
-import com.backend.dto.SharedDiaryRequest;
+import com.backend.dto.SharedDiaryDto;
 import com.backend.repository.SharedDiaryContentRepository;
 import com.backend.repository.SharedDiaryRepository;
 import com.backend.repository.SharedDiaryUserRepository;
@@ -18,8 +18,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class SharedDiaryService {
@@ -45,10 +47,11 @@ public class SharedDiaryService {
     @Autowired
     private UserRepository userRepository;
 
-    public SharedDiary createSharedDiary(SharedDiaryRequest request, User user){
+    public SharedDiary createSharedDiary(SharedDiaryDto request, String userId){
+        User user = userRepository.findByUserId(userId);
         SharedDiary sharedDiary = new SharedDiary();
         sharedDiary.setTitle(request.getTitle());
-        sharedDiary.setCoverImage(request.getCoverImage());
+        sharedDiary.setCoverImageUrl(request.getCoverImageUrl());
         sharedDiary.setUser(user);
         sharedDiaryRepository.save(sharedDiary);
         SharedDiaryUser sharedDiaryUser = new SharedDiaryUser();
@@ -102,4 +105,26 @@ public class SharedDiaryService {
         Optional<SharedDiary> sharedDiary = sharedDiaryRepository.findById(id);
         return sharedDiary.get();
     }
+
+    private SharedDiaryDto convertToDto(SharedDiary sharedDiary) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy. MM. dd.");
+
+        SharedDiaryDto dto = new SharedDiaryDto();
+        dto.setId(sharedDiary.getId());
+        dto.setTitle(sharedDiary.getTitle());
+        dto.setCoverImageUrl(sharedDiary.getCoverImageUrl());
+        dto.setCreatedAt(sharedDiary.getCreatedAt().format(formatter)); // 날짜 포맷 변환
+
+        return dto;
+    }
+
+    public List<SharedDiaryDto> getSharedDiariesByUser(String userId) {
+        User user = userRepository.findByUserId(userId);
+        List<SharedDiary> sharedDiaries = sharedDiaryRepository.findAllByUser(user);
+
+        return sharedDiaries.stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
+    }
+
 }

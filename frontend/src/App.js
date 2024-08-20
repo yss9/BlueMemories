@@ -10,6 +10,7 @@ import CommunityForm from "./pages/community/Community";
 import SharedDiaryPage from "./pages/sharedDiary/SharedDiary";
 import CommunityDiaryPage from "./pages/community/CommunityDiary";
 import ApplicationList from "./pages/sharedDiary/Application";
+import LoadingAnimation from "./pages/diary/LoadingAnimation";
 
 function App() {
   return (
@@ -25,6 +26,7 @@ function App() {
             <Route path="/shared-diary" element={<SharedDiaryPage/>}/>
             <Route path="/community-diary" element={<CommunityDiaryPage/>}/>
             <Route path="/applications" element={<ApplicationList/>}/>
+            <Route path="/loading" element={<LoadingAnimation/>}/>
         </Routes>
       </BrowserRouter>
   );

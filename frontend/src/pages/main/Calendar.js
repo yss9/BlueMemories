@@ -47,6 +47,7 @@ const YearMonthDisplay = styled.div`
   align-items: center;
   font-family: 'Title';
   font-size: 24px;
+  cursor: pointer;
   margin-left: -50px;
 `;
 
@@ -57,6 +58,7 @@ const Select = styled.select`
   border: none;
   background: transparent;
   font-family: Content;
+  cursor: pointer;
 `;
 
 const DaysContainer = styled.div`

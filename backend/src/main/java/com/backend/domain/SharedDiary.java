@@ -21,7 +21,8 @@ public class SharedDiary {
 
     private String title;
 
-    private int coverImage;
+    @Column(length = 2048)
+    private String coverImageUrl;
 
     @CreationTimestamp
     @Column(name = "created_at")

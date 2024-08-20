@@ -1,39 +1,26 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 
+
 const LoadingContainer = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  width: 100vw;
   height: 100vh;
+  text-align: center;
+  background-color: rgba(115, 115, 115, 0.8);
+  
+  
 `;
 
 const LoadingImage = styled.img`
-  width: 100px;
-  height: 100px;
+  margin-top:9%;
+  width: 55%;
+  height: 60%;
 `;
 
-const images = [
-    require('../images/loading1.png'),
-    require('../images/loading2.png'),
-    require('../images/loading3.png'),
-    require('../images/loading4.png')
-];
-
 const LoadingAnimation = () => {
-    const [currentImage, setCurrentImage] = useState(0);
-
-    useEffect(() => {
-        const interval = setInterval(() => {
-            setCurrentImage((prevImage) => (prevImage + 1) % images.length);
-        }, 500); // 0.5초마다 이미지 변경
-
-        return () => clearInterval(interval); // 컴포넌트 언마운트 시 인터벌 정리
-    }, []);
-
     return (
         <LoadingContainer>
-            <LoadingImage src={images[currentImage]} alt="Loading" />
+            <LoadingImage src={require('../diary/images/loading.gif')} alt="Loading" />
         </LoadingContainer>
     );
 };
