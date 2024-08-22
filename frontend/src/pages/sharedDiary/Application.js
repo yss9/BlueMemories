@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import Nav from "../nav/Nav";
 import styled from "styled-components";
+import Cookies from 'js-cookie';
 
 const Container = styled.div`
   margin: 60px auto;
@@ -24,7 +26,6 @@ const ApplicationButtonBox = styled.div`
 `;
 
 const ApplicationListBox = styled.div`
-
   label {
     display: inline-block;
     width: 100px;
@@ -40,6 +41,53 @@ const ApplicationListBox = styled.div`
 
 const ApplicationList = () => {
     const [activeButton, setActiveButton] = useState("received");
+    const [applications, setApplications] = useState([]);
+
+    useEffect(() => {
+        fetchApplications();
+    }, [activeButton]);
+
+    const fetchApplications = async () => {
+        const token = Cookies.get('token');
+        try {
+            const response = await axios.get(`/api/shared-diary-applications/${activeButton}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+            setApplications(response.data);
+        } catch (error) {
+            console.error('Error fetching applications', error);
+        }
+    };
+
+    const handleAccept = async (id) => {
+        const token = Cookies.get('token');
+        try {
+            await axios.post(`/api/shared-diary-applications/accept/${id}`, null, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+            fetchApplications(); // 수락 후 목록 갱신
+        } catch (error) {
+            console.error('Error accepting application', error);
+        }
+    };
+
+    const handleRefuse = async (id) => {
+        const token = Cookies.get('token');
+        try {
+            await axios.delete(`/api/shared-diary-applications/refuse/${id}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+            fetchApplications(); // 거절 후 목록 갱신
+        } catch (error) {
+            console.error('Error refusing application', error);
+        }
+    };
 
     return (
         <div>
@@ -73,11 +121,19 @@ const ApplicationList = () => {
                     </button>
                 </ApplicationButtonBox>
                 <ApplicationListBox>
-                    <label>닉네임</label>
-                    <label>제목</label>
-                    <label>설명</label>
-                    <button>수락</button>
-                    <button>거절</button>
+                    {applications.map(app => (
+                        <div key={app.id} style={{ marginBottom: '10px' }}>
+                            <label>{activeButton === "received" ? app.senderName : app.receiverName}</label>
+                            <label>{app.sharedDiaryTitle}</label>
+                            <label>{app.message}</label>
+                            {activeButton === "received" && (
+                                <>
+                                    <button onClick={() => handleAccept(app.id)}>수락</button>
+                                    <button onClick={() => handleRefuse(app.id)}>거절</button>
+                                </>
+                            )}
+                        </div>
+                    ))}
                 </ApplicationListBox>
             </Container>
         </div>

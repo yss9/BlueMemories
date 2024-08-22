@@ -120,10 +120,29 @@ public class SharedDiaryService {
 
     public List<SharedDiaryDto> getSharedDiariesByUser(String userId) {
         User user = userRepository.findByUserId(userId);
-        List<SharedDiary> sharedDiaries = sharedDiaryRepository.findAllByUser(user);
+        List<SharedDiaryUser> sharedDiaryUsers = sharedDiaryUserRepository.findAllByUser(user);
 
+        // sharedDiaryUsers 리스트에서 각 SharedDiary를 가져와 리스트로 변환
+        List<SharedDiary> sharedDiaries = sharedDiaryUsers.stream()
+                .map(SharedDiaryUser::getSharedDiary)
+                .collect(Collectors.toList());
+
+        // DTO 변환 후 반환
         return sharedDiaries.stream()
                 .map(this::convertToDto)
+                .collect(Collectors.toList());
+    }
+
+    // 참여중인 멤버 검색
+    public List<String> getSharedDiaryMember(Long sharedDiaryId) {
+        SharedDiary sharedDiary = sharedDiaryRepository.findById(sharedDiaryId)
+                .orElseThrow(() -> new RuntimeException("Shared diary not found"));
+
+        List<SharedDiaryUser> bySharedDiary = sharedDiaryUserRepository.findBySharedDiary(sharedDiary);
+        System.out.println("bySharedDiary = " + bySharedDiary);
+        // 멤버들의 닉네임을 추출하여 리스트로 반환
+        return bySharedDiary.stream()
+                .map(sharedDiaryUser -> sharedDiaryUser.getUser().getNickname())
                 .collect(Collectors.toList());
     }
 

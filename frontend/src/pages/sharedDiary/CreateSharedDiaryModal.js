@@ -92,7 +92,7 @@ const TitleExampleBox = styled.div`
   }
 `;
 
-const Modal = ({ isOpen, onClose }) => {
+const CreateSharedDiaryModal = ({ isOpen, onClose }) => {
     const [selectedCover, setSelectedCover] = useState(null);
     const [title, setTitle] = useState('');
     const today = new Date().toLocaleDateString();
@@ -184,4 +184,4 @@ const Modal = ({ isOpen, onClose }) => {
     );
 };
 
-export default Modal;
+export default CreateSharedDiaryModal;

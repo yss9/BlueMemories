@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import styled, { keyframes } from 'styled-components';
+import styled from 'styled-components';
 import Nav from "../nav/Nav";
 import Cookies from "js-cookie";
 import axios from "axios";
-import LoadingAnimation from './LoadingAnimation';  // 추가된 부분
+import LoadingAnimation from '../diary/LoadingAnimation';
 
 const Container = styled.div`
   text-align: center;
@@ -154,7 +154,6 @@ const Button = styled.button`
   font-family: Title;
 `;
 
-
 const Overlay = styled.div`
   position: fixed;
   top: 0;
@@ -168,7 +167,7 @@ const Overlay = styled.div`
   align-items: center;
 `;
 
-const WriteDiaryForm = () => {
+const WriteSharedDiaryForm = () => {
     const location = useLocation();
     const navigate = useNavigate();
     const [title, setTitle] = useState('');
@@ -199,29 +198,29 @@ const WriteDiaryForm = () => {
         const token = Cookies.get('token');
 
         const formData = new FormData();
-        formData.append('diary', new Blob([JSON.stringify({
+        formData.append('data', new Blob([JSON.stringify({
             title,
             weather,
             date,
             content,
-            isPrivate: !isToggled
+            sharedDiaryId: location.state.id, // 공유일기장 ID를 추가
         })], {
             type: "application/json"
         }));
         if (image) {
-            formData.append('image', image);
+            formData.append('imageFile', image);
         }
 
         try {
-            await axios.post('/api/diaries', formData, {
+            await axios.post('/api/shared-diary-content/create', formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                     Authorization: `Bearer ${token}`
                 }
             });
 
-            // 성공 시 캘린더 페이지로 리다이렉트
-            navigate('/calendar');
+            // 성공 시 이전 페이지로 리다이렉트 (또는 적절한 페이지로)
+            navigate(-1);
         } catch (error) {
             console.error(error);
             // 에러 처리 로직
@@ -279,4 +278,4 @@ const WriteDiaryForm = () => {
     );
 };
 
-export default WriteDiaryForm;
+export default WriteSharedDiaryForm;

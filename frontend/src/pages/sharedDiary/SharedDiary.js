@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import axios from 'axios';
 import Cookies from 'js-cookie';
 import Nav from "../nav/Nav";
-import Modal from "./Modal";
+import CreateSharedDiaryModal from "./CreateSharedDiaryModal";
 import {useNavigate} from "react-router-dom";
 
 const Container = styled.div`
@@ -130,6 +130,7 @@ const SharedDiaryPage = () => {
         }
     };
 
+
     const handleApplicationList = () =>{
         navigate('/applications')
     }
@@ -142,8 +143,8 @@ const SharedDiaryPage = () => {
         setIsModalOpen(false);
     };
 
-    const handleSharedDiary = (id) => {
-        navigate(`/shared-diary/${id}`); // id를 경로에 포함하여 페이지 이동
+    const handleSharedDiary = (id, title) => {
+        navigate(`/shared-diary-list`,{state:{ id: id , titles:title} }); // id를 경로에 포함하여 페이지 이동
     }
 
     return (
@@ -160,11 +161,11 @@ const SharedDiaryPage = () => {
                 <ApplicationContainer>
                     <LabelBox>진행 중인 공유일기 목록</LabelBox>
                     <WriteSharedDiaryButton onClick={openModal}>+ 일기장 생성하기</WriteSharedDiaryButton>
-                    <Modal isOpen={isModalOpen} onClose={closeModal} />
+                    <CreateSharedDiaryModal isOpen={isModalOpen} onClose={closeModal} />
                 </ApplicationContainer>
                 <SharedDiaryListContainer>
                     {sharedDiaries.map(diary => (
-                        <SharedDiaryList key={diary.id} backgroundImage={diary.coverImageUrl} onClick={() => handleSharedDiary(diary.id)}>
+                        <SharedDiaryList key={diary.id} backgroundImage={diary.coverImageUrl} onClick={() => handleSharedDiary(diary.id, diary.title)}>
                             <h2>{diary.title}</h2>
                             <p>{diary.createdAt}</p>
                         </SharedDiaryList>

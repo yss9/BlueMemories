@@ -60,4 +60,15 @@ public class UserController {
         }
         return ResponseEntity.notFound().build();
     }
+
+    @GetMapping("/search-member")
+    public String getNicknameByUserId(@RequestParam String receiverId){
+        User user = userService.findByUserId(receiverId);
+        if (user != null){
+            return user.getNickname();
+        }
+        else{
+            return null;
+        }
+    }
 }

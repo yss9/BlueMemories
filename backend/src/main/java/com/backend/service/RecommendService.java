@@ -24,7 +24,6 @@ public class RecommendService {
 
         Mono<String> chatResponse = openAIService.getChatResponse(prompt);
         String response = chatResponse.block();
-        System.out.println("response = " + response);
 
         List<String> results = new ArrayList<>();
 
@@ -36,20 +35,8 @@ public class RecommendService {
             results.add(matcher.group(2).trim());
         }
 
-        // 결과 확인
-        System.out.println("Extracted recommendations: " + results);
-
         // 유튜브 동영상 검색
         List<String> videoUrls = youTubeService.searchVideos(results).collectList().block();
-
-        System.out.println("videoUrls = " + videoUrls);
-
-        // 결과에 유튜브 동영상 URL 추가
-//        if (videoUrls != null && !videoUrls.isEmpty()) {
-//            results.addAll(videoUrls);
-//        } else {
-//            System.out.println("No videos found for the provided queries.");
-//        }
 
         return videoUrls;
     }

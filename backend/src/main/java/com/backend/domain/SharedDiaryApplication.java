@@ -25,6 +25,7 @@ public class SharedDiaryApplication {
     @JoinColumn(name = "receiver")
     private User receiver;
 
+    private String message;
 
 
 }

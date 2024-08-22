@@ -11,6 +11,7 @@ import sadImage from '../diary/images/sad.png';
 import YouTube from 'react-youtube';
 import likeImage from '../images/likebutton.png';
 import commentImage from '../images/commentbutton.png';
+import refreshImage from '../images/refreshbutton.png';
 
 const BackGround = styled.div`
   background-image: url(${backgroundImage});
@@ -86,19 +87,23 @@ const TextWrapper = styled.div`
 `;
 
 const VideoContainer = styled.div`
+  margin-top: 30px;
   text-align: center;
-  margin-top: 20px;
 `;
 
 const RefreshButton = styled.button`
+  display: inline-block;
+  width: 130px;
+  height: 30px;
   margin-top: 20px;
-  padding: 10px 20px;
-  font-size: 16px;
+  padding: 6px 0px 20px 30px;
   background-color: #566e56;
-  color: white;
   border: none;
   border-radius: 5px;
   cursor: pointer;
+  font-family: Content;
+  color: white;
+
 `;
 
 const StateBox = styled.div`
@@ -115,15 +120,18 @@ const StateBox = styled.div`
 const RecommendBox = styled.div`
   width: 100%;
   margin-top: 100px;
-
+  
   label {
     font-family: Title;
     font-size: 25px;
+    display: block;
   }
 
   p {
     font-family: Content;
     margin-left: 10px;
+    width: 400px;
+    display: inline-block;
   }
 `;
 
@@ -132,6 +140,7 @@ const CommentContainer = styled.div`
   background-color: rgba(235, 243, 236, 1);
   border-radius: 15px;
   padding: 50px;
+  margin-top: 50px;
   margin-bottom: 100px;
 
   p {
@@ -199,8 +208,6 @@ const LikeButtonDiv = styled.div`
   font-size: 20px;
   line-height: 1.4;
   margin-right: 10px;
-  background: no-repeat;
-  background-image: url("${likeImage}");
 `;
 
 const CommentButtonDiv = styled.div`
@@ -212,8 +219,6 @@ const CommentButtonDiv = styled.div`
   font-size: 22px;
   line-height: 1.3;
   margin-right: 10px;
-  background: no-repeat;
-  background-image: url("${commentImage}");
 `;
 
 
@@ -227,6 +232,7 @@ const CommunityDiaryPage = () => {
     const [comments, setComments] = useState([]);
     const [newComment, setNewComment] = useState('');
     const [isLike, setIsLike] = useState(false);
+
 
     useEffect(() => {
         const token = Cookies.get('token');
@@ -268,6 +274,7 @@ const CommunityDiaryPage = () => {
             .catch((error) => {
                 console.error('Failed to fetch user info:', error);
             });
+
 
         // Fetch comments
         axios.get(`/api/get-comments/${id}`, {
@@ -409,15 +416,28 @@ const CommunityDiaryPage = () => {
                 <RecommendBox>
                     <label>오늘의 추천</label>
                     <p>기분이 {todaySentiment} 날 아래의 동영상을 시청해보는 것이 어떨까요?</p>
+                    <div style={{float:"right", width:"200px", marginTop:"0px", marginBottom:"30px", display:"inline-block"}}>
+                        <img src={refreshImage} style={{marginTop:"25px", marginLeft:"10px", position:"absolute", width:"18px"}}/>
+                        <RefreshButton onClick={handleRefresh}>
+                            새로운 동영상 추천
+                        </RefreshButton>
+                    </div>
                 </RecommendBox>
                 <VideoContainer>
                     <YouTube videoId={keywords[currentVideoIndex]}/>
                 </VideoContainer>
-                <RefreshButton onClick={handleRefresh}>새로운 동영상 추천 받기</RefreshButton>
                 <CommentContainer>
                     <div style={{marginBottom:"20px"}}>
-                        <LikeButtonDiv onClick={handleLikeSubmit}>좋아요 &nbsp;{likeNum}</LikeButtonDiv>
-                        <CommentButtonDiv>댓글 &nbsp;{comments.length}</CommentButtonDiv>
+                        <div>
+                            <img onClick={handleLikeSubmit} src={likeImage} style={{height:"22px",position:"absolute", marginTop:"4px", marginLeft:"8px", cursor:"pointer"}}/>
+                        </div>
+                        <LikeButtonDiv onClick={handleLikeSubmit}>
+                            좋아요 &nbsp;{likeNum}
+                        </LikeButtonDiv>
+                        <img src={commentImage} style={{height:"22px",position:"absolute", marginTop:"4px", marginLeft:"8px"}}/>
+                        <CommentButtonDiv>
+                            댓글 &nbsp;{comments.length}
+                        </CommentButtonDiv>
                     </div>
                     <CommentInputBox
                         value={newComment}

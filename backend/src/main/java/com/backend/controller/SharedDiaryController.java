@@ -70,8 +70,9 @@ public class SharedDiaryController {
         }
     }
 
-    //공유일기장 컨텐츠 작성하기
-
-    //공유일기장 컨텐츠 삭제하기
-
+    //공유일기장 멤버 조회
+    @GetMapping("/shared-diary-members/{id}")
+    public List<String> getSharedDiaryMember(@PathVariable Long id){
+        return sharedDiaryService.getSharedDiaryMember(id);
+    }
 }
