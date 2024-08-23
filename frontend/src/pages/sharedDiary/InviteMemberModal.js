@@ -3,12 +3,15 @@ import styled from 'styled-components';
 import axios from 'axios';
 import Cookies from 'js-cookie';
 import {useLocation} from "react-router-dom";
+import closeImage from "../images/closebButton.png";
+import searchImage from "../images/searchButton.png";
 
 const ModalContainer = styled.div`
   background-color: white;
   padding: 20px;
   border-radius: 10px;
   width: 400px;
+  height: 400px;
   box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
   
   position: fixed;
@@ -18,34 +21,58 @@ const ModalContainer = styled.div`
   z-index: 1000;
 `;
 
+const CloseButton = styled.button`
+  width: 25px;
+  height: 25px;
+  background-color: transparent;
+  background-image: url("${closeImage}");
+  background-size: cover;
+  border: none;
+  float: right;
+  cursor: pointer;
+`
+
 const InputContainer = styled.div`
+  margin-bottom: 20px;
   display: flex;
   flex-direction: column;
-  margin-bottom: 20px;
 `;
 
 const SearchInput = styled.input`
   padding: 10px;
-  font-size: 16px;
+  font-size: 15px;
   margin-bottom: 10px;
-  border: 1px solid #ccc;
+  color: black;
+  font-family: Content;
+  border: 1px solid rgba(94, 120, 100, 1);
   border-radius: 5px;
+  height: 20px;
 `;
 
 const SearchButton = styled.button`
-  padding: 10px;
-  background-color: #566e56;
-  color: white;
-  font-size: 16px;
+  width: 25px;
+  height: 25px;
+  background-color: transparent;
+  background-image: url("${searchImage}");
+  background-size: cover;
   border: none;
-  border-radius: 5px;
   cursor: pointer;
+  position: absolute;
+  margin-left: 365px;
+  margin-top: 9px;
 `;
 
 const Message = styled.p`
-  color: ${props => (props.isError ? 'red' : 'green')};
+  color: ${props => (props.isError ? 'red' : 'black')};
+  font-family: Title;
   margin-top: 10px;
-  font-size: 14px;
+  font-size: 30px;
+  padding-bottom: 20px;
+  span{
+    font-family: Content;
+    font-size: 20px;
+  }
+  border-bottom: 1px solid rgba(94, 120, 100, 1);
 `;
 
 const InviteButton = styled.button`
@@ -57,6 +84,7 @@ const InviteButton = styled.button`
   border-radius: 5px;
   cursor: ${props => (props.disabled ? 'not-allowed' : 'pointer')};
   margin-top: 20px;
+  width: 100%;
 `;
 
 const InviteMemberModal = ({ member,sharedDiaryId, onClose }) => {
@@ -64,6 +92,7 @@ const InviteMemberModal = ({ member,sharedDiaryId, onClose }) => {
     const [message, setMessage] = useState('');
     const [inviteMessage, setInviteMessage] = useState('');
     const [isMemberFound, setIsMemberFound] = useState(false);
+    const [existMember, setExistMember] = useState('');
     const handleSearch = async () => {
         const token = Cookies.get('token');
         try {
@@ -79,7 +108,8 @@ const InviteMemberModal = ({ member,sharedDiaryId, onClose }) => {
                 setIsMemberFound(false);
             }
             else if(response.data){
-                setMessage('존재하는 아이디입니다.');
+                setMessage(response.data);
+                setExistMember('@'+receiverId);
                 setIsMemberFound(true);
             }
             else {
@@ -113,36 +143,37 @@ const InviteMemberModal = ({ member,sharedDiaryId, onClose }) => {
 
     return (
         <ModalContainer>
-            <button style={{
-                width: "20px",
-                height: "20px",
-                backgroundColor: "transparent",
-                border: "2px solid rgba(94, 120, 100, 1)",
-                float: "right",
-                borderRadius: "50%",
-                fontWeight: "bold",
-                paddingLeft: "4px",
-                color: "rgba(94, 120, 100, 1)",
-                cursor: "pointer"
-            }} onClick={onClose}>X</button>
+            <div style={{width:"100%", height:"50px", textAlign:"center", fontFamily:"Title", fontSize:"30px"}}>
+                친구초대
+                <CloseButton onClick={onClose}></CloseButton>
+            </div>
             <InputContainer>
                 <SearchInput
                     type="text"
-                    placeholder="닉네임으로 검색"
+                    placeholder="아이디로 검색"
                     value={receiverId}
                     onChange={(e) => setReceiverId(e.target.value)}
                 />
-                <SearchButton onClick={handleSearch}>검색</SearchButton>
-                {message && <Message isError={!isMemberFound}>{message}</Message>}
-                <input
-                    type="text"
-                    placeholder="메시지를 입력하세요"
+                <SearchButton onClick={handleSearch}></SearchButton>
+                {message && <Message isError={!isMemberFound}>{message} <span>{existMember}</span></Message>}
+                <textarea
+                    placeholder="메시지를 작성해주세요"
                     value={inviteMessage}
                     onChange={(e)=>setInviteMessage(e.target.value)}
+                    style={{
+                        resize: "none",
+                        border:"none",
+                        backgroundColor:"rgba(184, 232, 234, 0.5)",
+                        borderRadius:"10px",
+                        height:"100px",
+                        padding:"10px",
+                        color:"black",
+
+                    }}
                 />
             </InputContainer>
             <InviteButton onClick={handleInvite} disabled={!isMemberFound}>
-                초대하기
+                전송하기
             </InviteButton>
         </ModalContainer>
     );

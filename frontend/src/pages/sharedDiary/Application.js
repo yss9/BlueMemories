@@ -26,18 +26,77 @@ const ApplicationButtonBox = styled.div`
 `;
 
 const ApplicationListBox = styled.div`
-  label {
-    display: inline-block;
-    width: 100px;
-    font-family: Content;
-  }
-
-  button {
-    margin-left: 10px;
-    padding: 5px 10px;
-    cursor: pointer;
-  }
+  padding: 30px 0px 25px 30px;
+  border-bottom: 1px solid rgba(94, 120, 100, 1);
 `;
+
+const NicknameBox = styled.label`
+    border: 2px solid rgba(172, 235, 193, 1);
+  border-radius: 10px;
+  padding: 2px 13px;
+  font-family: Title;
+  font-size: 27px;
+  
+`
+
+const TitleBox = styled.div`
+  margin-left: 30px;
+  font-family: Title;
+  font-size: 27px;
+  display: inline-block;
+`
+
+const MessageBox = styled.div`
+    margin: 10px 0px 0px 100px;
+  font-family: Title;
+  font-size: 20px;
+`
+
+const AcceptButton = styled.button`
+  float: right;
+    border: none;
+  border-radius: 10px;
+  color: white;
+  width: 70px;
+  height: 40px;
+  font-size: 24px;
+  font-family: Title;
+   background-color:  rgba(94, 120, 100, 1);
+  margin-top: 15px;
+  margin-right: 20px;
+  cursor: pointer;
+`
+
+const RefuseButton = styled.button`
+  float: right;
+  border: none;
+  border-radius: 10px;
+  color: black;
+  width: 70px;
+  height: 40px;
+  font-size: 24px;
+  font-family: Title;
+   background-color:  rgba(219, 243, 244, 0.5);
+  margin-right: 60px;
+  margin-top: 15px;
+  cursor: pointer;
+`
+
+const CancelButton = styled.button`
+  float: right;
+  border: none;
+  border-radius: 10px;
+  color: black;
+  width: 70px;
+  height: 40px;
+  font-size: 24px;
+  font-family: Title;
+  background-color:  rgba(219, 243, 244, 0.5);
+  margin-right: 60px;
+  margin-top: 15px;
+  text-align: center;
+ cursor: pointer;
+`
 
 const ApplicationList = () => {
     const [activeButton, setActiveButton] = useState("received");
@@ -89,6 +148,20 @@ const ApplicationList = () => {
         }
     };
 
+    const handleCancel = async (id) => {
+        const token = Cookies.get('token');
+        try {
+            await axios.delete(`/api/shared-diary-applications/cancel/${id}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+            fetchApplications(); // 거절 후 목록 갱신
+        } catch (error) {
+            console.error('Error refusing application', error);
+        }
+    };
+
     return (
         <div>
             <Nav />
@@ -122,16 +195,31 @@ const ApplicationList = () => {
                 </ApplicationButtonBox>
                 <ApplicationListBox>
                     {applications.map(app => (
-                        <div key={app.id} style={{ marginBottom: '10px' }}>
-                            <label>{activeButton === "received" ? app.senderName : app.receiverName}</label>
-                            <label>{app.sharedDiaryTitle}</label>
-                            <label>{app.message}</label>
-                            {activeButton === "received" && (
-                                <>
-                                    <button onClick={() => handleAccept(app.id)}>수락</button>
-                                    <button onClick={() => handleRefuse(app.id)}>거절</button>
-                                </>
-                            )}
+                        <div key={app.id} style={{ marginBottom: '10px'}}>
+                            <div style={{display:"inline-block"}}>
+                                <NicknameBox>
+                                    {activeButton === "received" ? app.senderName : app.receiverName}
+                                </NicknameBox>
+                                <TitleBox>
+                                    {app.sharedDiaryTitle}
+                                </TitleBox>
+                                <MessageBox>
+                                    {app.message}
+                                </MessageBox>
+                            </div>
+                            <div style={{display:"inline-block", float:"right"}}>
+                                {activeButton === "received" && (
+                                    <>
+                                        <RefuseButton onClick={() => handleRefuse(app.id)}>거절</RefuseButton>
+                                        <AcceptButton onClick={() => handleAccept(app.id)}>수락</AcceptButton>
+                                    </>
+                                )}
+                                {activeButton !== "received" && (
+                                    <>
+                                        <CancelButton onClick={() => handleCancel(app.id)}>취소</CancelButton>
+                                    </>
+                                )}
+                            </div>
                         </div>
                     ))}
                 </ApplicationListBox>

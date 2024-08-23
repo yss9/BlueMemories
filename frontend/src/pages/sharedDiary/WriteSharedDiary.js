@@ -172,11 +172,21 @@ const WriteSharedDiaryForm = () => {
     const navigate = useNavigate();
     const [title, setTitle] = useState('');
     const [weather, setWeather] = useState('');
-    const [date, setDate] = useState('');
     const [content, setContent] = useState('');
     const [isToggled, setIsToggled] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [image, setImage] = useState(null);
+    const today = new Date();
+
+    // 연도, 월, 일을 가져와서 원하는 형식으로 포맷
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0'); // 월은 0부터 시작하므로 +1 필요
+    const day = String(today.getDate()).padStart(2, '0');
+
+    const formattedDate = `${year}-${month}-${day}`;
+
+    const [date, setDate] = useState(formattedDate);
+
 
     useEffect(() => {
         if (location.state && location.state.date) {
@@ -264,12 +274,13 @@ const WriteSharedDiaryForm = () => {
                         </ColumnBox>
                         <ColumnBox>
                             <label>날짜</label>
-                            <input type="text" value={date} onChange={(e) => setDate(e.target.value)} placeholder="2000-00-00" />
+                            <input type="text" value={date} onChange={(e) => setDate(e.target.value)} placeholder="2000-00-00"  />
                         </ColumnBox>
                     </TwoColumnContainer>
                     <LargeInput value={content} onChange={(e) => setContent(e.target.value)} placeholder="본문" />
+                    <div style={{fontFamily:"Content"}}>글자 수는 1000자를 초과할 수 없습니다. 현재 글자 수 : {content.length}</div>
                     <ButtonContainer style={{ float: "left" }}>
-                        <input type="file" onChange={handleImageChange} />
+                        <input type="file" id="inputTag" onChange={handleImageChange}  />
                         <Button style={{ width: "120px", height: "35px", fontSize: "18px" }}>사진 첨부하기</Button>
                     </ButtonContainer>
                 </Container>

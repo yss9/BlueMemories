@@ -179,6 +179,8 @@ const WriteDiaryForm = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [image, setImage] = useState(null);
 
+
+
     useEffect(() => {
         if (location.state && location.state.date) {
             setDate(location.state.date);

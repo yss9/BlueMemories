@@ -22,13 +22,14 @@ const LabelContainer = styled.div`
   text-align: center;
   font-family: Title;
   font-size: 30px;
+  display: inline-block;
 `;
 
 const SearchContainer = styled.div`
-  text-align: center;
   width: 100%;
   height: 55px;
   margin-top: -20px;
+  display: inline-block;
 `;
 
 const ApplicationContainer = styled.div`
@@ -59,7 +60,8 @@ const SearchInput = styled.input`
 
 const ApplicationListButton = styled.button`
   background-color: rgba(232, 232, 232, 1);
-  margin-left: 30px;
+  float: right;
+  margin-right: 130px;
   width: 120px;
   height: 45px;
   border: none;
@@ -155,7 +157,6 @@ const SharedDiaryPage = () => {
                     친구를 찾아서 교환일기 신청을 해 보세요.
                 </LabelContainer>
                 <SearchContainer>
-                    <SearchInput placeholder="친구를 검색하세요" />
                     <ApplicationListButton  onClick={handleApplicationList} >신청 목록</ApplicationListButton>
                 </SearchContainer>
                 <ApplicationContainer>
