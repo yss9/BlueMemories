@@ -18,7 +18,7 @@ import LoadSharedDiaryContent from "./pages/sharedDiary/LoadSharedDiaryContent";
 import LoadSharedDiaryPage from "./pages/sharedDiary/LoadSharedDiaryContent";
 import CalendarListPage from "./pages/main/CalendarList";
 import MyPage from "./pages/main/MyPage";
-import TestPage from "./pages/main/Test";
+
 
 
 function App() {
@@ -41,7 +41,6 @@ function App() {
             <Route path="/load-shared-diary-content" element={<LoadSharedDiaryPage/>}/>
             <Route path="/calendar-list" element={<CalendarListPage/>}/>
             <Route path="/profile" element={<MyPage/>}/>
-            <Route path="/test" element={<TestPage/>}/>
         </Routes>
       </BrowserRouter>
   );
