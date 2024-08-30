@@ -27,8 +27,6 @@ const Container = styled.div`
 
 const HeaderContainer = styled.div`
   display: flex;
-  justify-content: space-between;
-  align-items: center;
   padding: 10px 20px;
 `;
 
@@ -43,12 +41,12 @@ const Button = styled.button`
 `;
 
 const YearMonthDisplay = styled.div`
+  margin-left: 220px;
   display: flex;
   align-items: center;
   font-family: 'Title';
   font-size: 24px;
   cursor: pointer;
-  margin-left: -50px;
 `;
 
 const Select = styled.select`
@@ -141,6 +139,10 @@ const Calendar = () => {
         }
     };
 
+    const handleListView = () => {
+      navigate('/calendar-list');
+    };
+
     const handlePrevMonth = () => {
         setCurrentDate(subMonths(currentDate, 1));
     };
@@ -219,7 +221,7 @@ const Calendar = () => {
             <Nav />
             <Container>
                 <HeaderContainer>
-                    <Button style={{ padding: "5px 30px", fontSize: "18px" }}>일기 쓰기</Button>
+                    {/*<Button style={{ padding: "5px 30px", fontSize: "18px" }} >일기 쓰기</Button>*/}
                     <YearMonthDisplay>
                         <Button style={{ color: "black", backgroundColor: "white" }} onClick={handlePrevMonth}>&lt;</Button>
                         <Select value={getYear(currentDate)} onChange={handleYearChange}>
@@ -234,8 +236,8 @@ const Calendar = () => {
                         </Select>
                         <Button style={{ color: "black", backgroundColor: "white" }} onClick={handleNextMonth}>&gt;</Button>
                     </YearMonthDisplay>
-                    <button style={{ backgroundColor: "transparent", border: "0", cursor: "pointer" }}>
-                        <img src={`${process.env.PUBLIC_URL}/image/posting_list.png`} alt="icon" width="25" height="25" />
+                    <button style={{ backgroundColor: "transparent", border: "0", cursor: "pointer", marginLeft:"180px" }}>
+                        <img src={`${process.env.PUBLIC_URL}/image/posting_list.png`} alt="icon" width="25" height="25" onClick={handleListView} />
                     </button>
                 </HeaderContainer>
                 <WeekdaysContainer>{renderWeekdays()}</WeekdaysContainer>

@@ -86,7 +86,6 @@ const SignInForm = () => {
         try {
             const token = await signInUser(userId, password);
             Cookies.set('token', token); // JWT 토큰을 쿠키에 저장
-            console.log(token)
             alert('로그인 성공');
             navigate('/'); // 로그인 후 이동할 페이지
         } catch (error) {

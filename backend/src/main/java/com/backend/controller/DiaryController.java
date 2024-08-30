@@ -53,4 +53,17 @@ public class DiaryController {
     public List<DiaryDto> getDiariesByPublic(){
         return diaryServiceImpl.getDiariesByPublic();
     }
+
+
+    // 제목으로 다이어리 검색
+    @GetMapping("/search/title")
+    public List<DiarySentimentDto> searchDiariesByTitle(@RequestParam String keyword) {
+        return diaryServiceImpl.searchDiariesByTitle(keyword);
+    }
+
+    // 내용으로 다이어리 검색
+    @GetMapping("/search/content")
+    public List<DiarySentimentDto> searchDiariesByContent(@RequestParam String keyword) {
+        return diaryServiceImpl.searchDiariesByContent(keyword);
+    }
 }

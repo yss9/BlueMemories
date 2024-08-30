@@ -81,10 +81,60 @@ const Author = styled.p`
   font-size: 16px;
 `;
 
+const PaginationControls = styled.div`
+  text-align: center;
+  margin-top: 20px;
+`;
+
+const PageButton = styled.button`
+  font-family: Content;
+  margin: 0 5px;
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+  background-color: transparent;
+  border: none;
+  border-radius: 5px;
+
+  &:hover {
+    background-color: #ccc;
+  }
+
+  &:disabled {
+    background-color: #ddd;
+    cursor: not-allowed;
+  }
+
+  font-weight: ${props => props.isActive ? 'bold' : 'normal'};
+`;
+
+const ArrowButton = styled.button`
+  margin: 0 5px;
+  padding: 10px;
+  font-size: 16px;
+  cursor: pointer;
+  background-color: transparent;
+  border: none;
+  border-radius: 5px;
+  color: black;
+  font-family: Content;
+
+  &:hover {
+    background-color: transparent;
+  }
+
+  &:disabled {
+    background-color: transparent;
+    cursor: not-allowed;
+  }
+`;
+
 const CommunityForm = () => {
     const [diaries, setDiaries] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [currentPage, setCurrentPage] = useState(1);
+    const diariesPerPage = 30; // 페이지당 보여줄 일기 개수
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -111,14 +161,50 @@ const CommunityForm = () => {
         navigate(`/community-diary`, { state: { id: diary.id } });
     };
 
+    const handlePageChange = (pageNumber) => {
+        setCurrentPage(pageNumber);
+    };
+
     if (loading) return <div>Loading...</div>;
     if (error) return <div>Error loading diaries.</div>;
 
+    const indexOfLastDiary = currentPage * diariesPerPage;
+    const indexOfFirstDiary = indexOfLastDiary - diariesPerPage;
+    const currentDiaries = diaries.slice(indexOfFirstDiary, indexOfLastDiary);
+
+    const totalPages = Math.ceil(diaries.length / diariesPerPage);
+
     // 3개의 컬럼에 아이템을 분배하는 함수
     const columns = [[], [], []];
-    diaries.forEach((diary, index) => {
+    currentDiaries.forEach((diary, index) => {
         columns[index % 3].push(diary);
     });
+
+    const renderPageNumbers = () => {
+        const pageNumbers = [];
+        const maxPagesToShow = 5;
+
+        let startPage = Math.max(currentPage - 2, 1);
+        let endPage = Math.min(startPage + maxPagesToShow - 1, totalPages);
+
+        if (endPage - startPage < maxPagesToShow - 1) {
+            startPage = Math.max(endPage - maxPagesToShow + 1, 1);
+        }
+
+        for (let i = startPage; i <= endPage; i++) {
+            pageNumbers.push(
+                <PageButton
+                    key={i}
+                    onClick={() => handlePageChange(i)}
+                    isActive={i === currentPage}
+                >
+                    {i}
+                </PageButton>
+            );
+        }
+
+        return pageNumbers;
+    };
 
     return (
         <div>
@@ -144,6 +230,15 @@ const CommunityForm = () => {
                         </Column>
                     ))}
                 </MasonryContainer>
+                <PaginationControls>
+                    <ArrowButton onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1}>
+                        &lt;
+                    </ArrowButton>
+                    {renderPageNumbers()}
+                    <ArrowButton onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages}>
+                        &gt;
+                    </ArrowButton>
+                </PaginationControls>
             </Container>
         </div>
     );

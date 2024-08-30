@@ -65,7 +65,7 @@ public class DiaryServiceImpl implements DiaryService {
         diary.setConfidenceNeutral(confidenceNeutral);
         diary.setConfidencePositive(confidencePositive);
 
-        List<String> recommendations = recommendService.recommendSearch(confidencePositive, confidenceNeutral, confidenceNegative);
+        List<String> recommendations = recommendService.recommendSearchWord(confidencePositive, confidenceNeutral, confidenceNegative);
         diary.setKeyword1(recommendations.get(0));
         diary.setKeyword2(recommendations.get(1));
         diary.setKeyword3(recommendations.get(2));
@@ -135,9 +135,11 @@ public class DiaryServiceImpl implements DiaryService {
         }
         LocalDate startDate = YearMonth.of(year, month).atDay(1);
         LocalDate endDate = YearMonth.of(year, month).atEndOfMonth();
-        return diaryRepository.findByUserAndDateBetween(user, startDate.toString(), endDate.toString())
+        return diaryRepository.findByUserAndDateBetweenOrderByDateDesc(user, startDate.toString(), endDate.toString())
                 .stream()
-                .map(diary -> new DiarySentimentDto(diary.getId(),diary.getDate(), diary.getSentiment()))
+                .map(diary -> new DiarySentimentDto(diary.getId(),diary.getDate(), diary.getSentiment(), diary.getTitle()
+                        , diary.getContent(), diary.getConfidencePositive(), diary.getConfidenceNeutral()
+                        , diary.getConfidenceNegative(), diary.getImageUrl()))
                 .collect(Collectors.toList());
     }
 
@@ -177,5 +179,43 @@ public class DiaryServiceImpl implements DiaryService {
 
         return diaryDto;
     }
+
+
+    // 제목으로 다이어리 검색
+    public List<DiarySentimentDto> searchDiariesByTitle(String keyword) {
+        List<Diary> diaries = diaryRepository.findByTitleContaining(keyword);
+        return diaries.stream()
+                .map(diary -> new DiarySentimentDto(
+                        diary.getId(),
+                        diary.getDate(),
+                        diary.getSentiment(),
+                        diary.getTitle(),
+                        diary.getContent(),
+                        diary.getConfidencePositive(),
+                        diary.getConfidenceNeutral(),
+                        diary.getConfidenceNegative(),
+                        diary.getImageUrl()
+                ))
+                .collect(Collectors.toList());
+    }
+
+    // 내용으로 다이어리 검색
+    public List<DiarySentimentDto> searchDiariesByContent(String keyword) {
+        List<Diary> diaries = diaryRepository.findByContentContaining(keyword);
+        return diaries.stream()
+                .map(diary -> new DiarySentimentDto(
+                        diary.getId(),
+                        diary.getDate(),
+                        diary.getSentiment(),
+                        diary.getTitle(),
+                        diary.getContent(),
+                        diary.getConfidencePositive(),
+                        diary.getConfidenceNeutral(),
+                        diary.getConfidenceNegative(),
+                        diary.getImageUrl()
+                ))
+                .collect(Collectors.toList());
+    }
+
 
 }

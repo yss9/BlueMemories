@@ -9,6 +9,8 @@ import addMemberImage from "./image/addMemberImage.png"
 import happyImage from "./image/happy.png";
 import neutralImage from "./image/neutral.png";
 import sadImage from "./image/sad.png";
+import memberImage from "./image/memberImage.png";
+import searchImage from "../images/searchButton.png"
 
 const Container = styled.div`
   margin: 0 auto;
@@ -32,9 +34,9 @@ const SearchContainer = styled.div`
   display: inline-block;
   justify-content: center;
   gap: 10px;
-
+  margin-left: 200px;
   input {
-    width: 350px;
+    width: 450px;
     height: 20px;
     padding: 8px;
     border-radius: 5px;
@@ -44,16 +46,20 @@ const SearchContainer = styled.div`
   }
 
   select {
-    padding: 8px;
-    border-radius: 5px;
-    border: 1px solid #ddd;
+    
+    border-radius: 10px;
+    border: 2px solid #ddd;
   }
 
   button {
-    padding: 8px 15px;
-    border-radius: 5px;
-    background-color: #566e56;
-    color: white;
+    position: relative;
+    top:10px;
+    right: 40px;
+    background-image: url("${searchImage}");
+    background-color: transparent;
+    background-size: cover;
+    width: 30px;
+    height: 30px;
     border: none;
     cursor: pointer;
   }
@@ -69,6 +75,7 @@ const ContentItem = styled.div`
   margin-bottom: 15px;
   padding:30px 0;
   border-bottom: 1px solid black;
+  cursor: pointer;
 `;
 
 const ImageBox = styled.div`
@@ -90,7 +97,10 @@ const CreateContentButton = styled.button`
   background-color: rgba(94, 120, 100, 1);
   color: white;
   border-radius: 10px;
+  width: 130px;
   padding: 10px 30px;
+  margin-right: 150px;
+  margin-top: 5px;
   font-family: Content;
   float: right;
   font-size: 15px;
@@ -129,7 +139,16 @@ const Date = styled.div`
 const SentimentBox = styled.div`
   float: right;
   margin-top: -8px;
-  background-color: rgba(179, 246, 202, 1);
+  background-color: ${(props) => {
+    switch (props.sentiment) {
+      case 'positive':
+        return 'rgba(179, 246, 202, 1)'; // 예: 긍정적인 감정일 때
+      case 'neutral':
+        return 'rgba(184, 232, 234, 1)'; // 예: 중립적인 감정일 때
+      case 'negative':
+        return 'rgba(124, 157, 132, 1)'; // 예: 부정적인 감정일 때
+    }
+  }};
   padding:10px 0px 8px 20px;
   width: 130px;
   height: 20px;
@@ -171,6 +190,42 @@ const JoinMemberButton = styled.button`
   
 `
 
+const MemberListBox = styled.div`
+  font-family: Content;
+  margin-top: 10px;
+  margin-bottom: 20px;
+  p{
+    display: inline-block;
+  }
+`
+
+const SearchSelect = styled.select`
+  width: 100px;
+  height: 40px;
+  padding: 0 10px;
+  font-size: 16px;
+  font-family: Content;
+  margin-right: 10px;
+  position: relative;
+  cursor: pointer;
+`;
+
+const SortSelectBox = styled.div`
+  margin-bottom: 20px;
+  width: 100%;
+`
+
+const SortSelect = styled.select`
+  float: left;
+    border: 2px solid rgba(232, 232, 232, 1);
+  font-family: Title;
+  padding: 5px 20px 5px 10px;
+  font-size: 20px;
+  border-radius: 10px;
+  
+`
+
+
 const SharedDiaryContentPage = () => {
     const location = useLocation();
     const navigate = useNavigate();
@@ -182,7 +237,7 @@ const SharedDiaryContentPage = () => {
     const [searchQuery, setSearchQuery] = useState(''); // 검색 쿼리
     const [members, setMembers] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false); // Modal state
-
+    const [sortType, setSortType] = useState('desc'); // 기본값은 내림차순
     function resultSentiment(s, a, b, c) {
         const sentiments = {
             positive: "긍정 ",
@@ -207,20 +262,21 @@ const SharedDiaryContentPage = () => {
             return `${sadImage}`;
         }
     }
+
     useEffect(() => {
         fetchDiaryContents();
         fetchDiaryMembers();
-    }, []);
+    }, [sortType]); // sortType이 변경될 때마다 fetchDiaryContents를 호출
 
     const fetchDiaryContents = async () => {
         const token = Cookies.get('token'); // 인증 토큰 가져오기
         try {
-            const response = await axios.get(`/api/shared-diary-content/${id}`, {
+            const response = await axios.get(`/api/shared-diary-content/${id}/${sortType}`, {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }
             });
-            setContents(response.data); // 응답받은 데이터를 contents 상태에 저장
+            setContents(response.data); // 정렬된 데이터를 contents 상태에 저장
         } catch (error) {
             console.error('Error fetching diary contents', error);
         } finally {
@@ -295,8 +351,13 @@ const SharedDiaryContentPage = () => {
     };
 
     const handleInvite = (id, nickname) => {
-
+        // Invite member logic
     };
+
+    const handleDiaryClick = (id) => {
+        navigate('/load-shared-diary-content', { state: { id: id } });
+    };
+
 
     return (
         <div>
@@ -305,35 +366,43 @@ const SharedDiaryContentPage = () => {
                 <Header>
                     <TitleBox>{titles}</TitleBox>
                     <JoinMemberBox>
-                        <img src={addMemberImage} style={{width:"23px", position:"absolute", right:"80px", top:"5px"}} />
+                        <img src={addMemberImage} style={{ width: "23px", position: "absolute", right: "80px", top: "5px" }} />
                         <JoinMemberButton onClick={openModal}>멤버 추가</JoinMemberButton>
                     </JoinMemberBox>
-                    <div style={{ fontFamily: "Content", marginTop: "10px", marginBottom: "20px" }}>
-                        {members.map((member, index) => (
-                            <span key={index}>
+
+                    <MemberListBox>
+                        <img src={memberImage} style={{ width: "22px", position: "absolute", left: "620px", top: "190px" }} />
+                        {members.length > 0 && members.map((member, index) => (
+                            <p key={index}>
                                 {member}
                                 {index < members.length - 1 && ', '}
-                            </span>
+                            </p>
                         ))}
                         <span>&nbsp; 참여 중</span>
-                    </div>
+                    </MemberListBox>
                     <div>
                         <SearchContainer>
-                            <select value={searchType} onChange={(e) => setSearchType(e.target.value)}>
+                            <SearchSelect value={searchType} onChange={(e) => setSearchType(e.target.value)}>
                                 <option value="title">제목</option>
                                 <option value="content">내용</option>
                                 <option value="nickname">닉네임</option>
-                            </select>
-                            <input
-                                type="text"
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                placeholder="검색어를 입력하세요"
+                            </SearchSelect>
+                            <input style={{ fontFamily: "Content", height: "23px" }}
+                                   type="text"
+                                   value={searchQuery}
+                                   onChange={(e) => setSearchQuery(e.target.value)}
+                                   placeholder="검색어를 입력하세요"
                             />
-                            <button onClick={handleSearch}>검색</button>
+                            <button onClick={handleSearch}></button>
                         </SearchContainer>
                         <CreateContentButton onClick={handleContentWrite}>일기 쓰기</CreateContentButton>
                     </div>
+                    <SortSelectBox>
+                        <SortSelect value={sortType} onChange={(e) => setSortType(e.target.value)}>
+                            <option value="desc">최근 날짜순</option>
+                            <option value="asc">오래된 날짜순</option>
+                        </SortSelect>
+                    </SortSelectBox>
                 </Header>
                 <div>
                     {loading ? (
@@ -341,13 +410,16 @@ const SharedDiaryContentPage = () => {
                     ) : contents.length > 0 ? (
                         <ContentList>
                             {contents.map(content => (
-                                <ContentItem key={content.id}>
+                                <ContentItem key={content.id} onClick={() => handleDiaryClick(content.id)}>
                                     <ContentBox>
                                         <Nickname>{content.nickname}</Nickname>
                                         <div style={{ marginTop: "20px" }}>
                                             <Title>{content.title}</Title>
-                                            <SentimentBox>
-                                                <img src={getImageForSentiment(content.confidencePositive, content.confidenceNeutral, content.confidenceNegative)} alt="sentiment image"/>
+                                            <SentimentBox sentiment={content.sentiment}>
+                                                <img
+                                                    src={getImageForSentiment(content.confidencePositive, content.confidenceNeutral, content.confidenceNegative)}
+                                                    alt="sentiment image"
+                                                />
                                                 {resultSentiment(content.sentiment, content.confidencePositive, content.confidenceNeutral, content.confidenceNegative)}
                                             </SentimentBox>
                                             <Date>{content.date}</Date>
@@ -370,7 +442,7 @@ const SharedDiaryContentPage = () => {
             {isModalOpen && (
                 <InviteMemberModal
                     sharedDiaryId={id}
-                    member = {members[0]}
+                    member={members[0]}
                     onClose={closeModal}
                     onInvite={handleInvite}
                 />

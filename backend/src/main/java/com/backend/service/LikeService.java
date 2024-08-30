@@ -36,7 +36,6 @@ public class LikeService {
         Diary diary = optionalDiary.get();
         User user = userRepository.findByUserId(userId);
         boolean isPush = userLikeRepository.existsByDiaryAndUser(diary, user);
-        System.out.println("isPush = " + isPush);
         if(!isPush){
             UserLikes userLikes = new UserLikes();
             userLikes.setDiary(diary);

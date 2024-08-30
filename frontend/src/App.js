@@ -15,6 +15,11 @@ import SharedDiaryContent from "./pages/sharedDiary/SharedDiaryContent";
 import SharedDiaryContentPage from "./pages/sharedDiary/SharedDiaryContent";
 import WriteSharedDiaryForm from "./pages/sharedDiary/WriteSharedDiary";
 import LoadSharedDiaryContent from "./pages/sharedDiary/LoadSharedDiaryContent";
+import LoadSharedDiaryPage from "./pages/sharedDiary/LoadSharedDiaryContent";
+import CalendarListPage from "./pages/main/CalendarList";
+import MyPage from "./pages/main/MyPage";
+import TestPage from "./pages/main/Test";
+
 
 function App() {
   return (
@@ -33,7 +38,10 @@ function App() {
             <Route path="/loading" element={<LoadingAnimation/>}/>
             <Route path="/shared-diary-list" element={<SharedDiaryContentPage/>}/>
             <Route path="/write-shared-diary" element={<WriteSharedDiaryForm/>}/>
-            <Route path="/load-shared-diary-content" element={<LoadSharedDiaryContent/>}/>
+            <Route path="/load-shared-diary-content" element={<LoadSharedDiaryPage/>}/>
+            <Route path="/calendar-list" element={<CalendarListPage/>}/>
+            <Route path="/profile" element={<MyPage/>}/>
+            <Route path="/test" element={<TestPage/>}/>
         </Routes>
       </BrowserRouter>
   );

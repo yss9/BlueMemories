@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import styled, { keyframes } from 'styled-components';
+import styled from 'styled-components';
 import Nav from "../nav/Nav";
 import Cookies from "js-cookie";
 import axios from "axios";
-import LoadingAnimation from './LoadingAnimation';  // 추가된 부분
+import LoadingAnimation from '../diary/LoadingAnimation';
 
 const Container = styled.div`
   text-align: center;
@@ -103,10 +103,6 @@ const ColumnBox = styled.div`
   border-radius: 10px;
   padding: 0 10px;
 
-  &:last-child {
-    margin-left: 15px;
-  }
-
   label {
     font-size: 23px;
     padding-left: 15px;
@@ -139,13 +135,13 @@ const LargeInput = styled.textarea`
 
 const ButtonContainer = styled.div`
   display: flex;
-  justify-content: center;
+  align-items: center;
 `;
 
 const Button = styled.button`
-  width: 85px;
-  height: 30px;
-  font-size: 21px;
+  width: 120px;
+  height: 35px;
+  font-size: 18px;
   background-color: #566e56;
   color: #fff;
   border: none;
@@ -154,6 +150,12 @@ const Button = styled.button`
   font-family: Title;
 `;
 
+const FileName = styled.span`
+  margin-left: 15px;
+  font-family: Content;
+  font-size: 16px;
+  color: #333;
+`;
 
 const Overlay = styled.div`
   position: fixed;
@@ -178,8 +180,7 @@ const WriteDiaryForm = () => {
     const [isToggled, setIsToggled] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [image, setImage] = useState(null);
-
-
+    const [fileName, setFileName] = useState(''); // 파일명 상태 추가
 
     useEffect(() => {
         if (location.state && location.state.date) {
@@ -191,8 +192,16 @@ const WriteDiaryForm = () => {
         setIsToggled(!isToggled);
     };
 
-    const handleImageChange = (e) => {
-        setImage(e.target.files[0]);
+    const handleImageChange = (event) => {
+        const file = event.target.files[0];
+        if (file) {
+            setImage(file);
+            setFileName(file.name); // 파일명 저장
+        }
+    };
+
+    const handleButtonClick = () => {
+        document.getElementById('inputTag').click();
     };
 
     const handleSubmit = async (e) => {
@@ -222,11 +231,9 @@ const WriteDiaryForm = () => {
                 }
             });
 
-            // 성공 시 캘린더 페이지로 리다이렉트
-            navigate('/calendar');
+            navigate('/calendar'); // 성공 시 캘린더 페이지로 리다이렉트
         } catch (error) {
             console.error(error);
-            // 에러 처리 로직
         } finally {
             setIsLoading(false); // 저장 완료 후 로딩 상태 false 설정
         }
@@ -271,9 +278,10 @@ const WriteDiaryForm = () => {
                         </ColumnBox>
                     </TwoColumnContainer>
                     <LargeInput value={content} onChange={(e) => setContent(e.target.value)} placeholder="본문" />
-                    <ButtonContainer style={{ float: "left" }}>
-                        <input type="file" onChange={handleImageChange} />
-                        <Button style={{ width: "120px", height: "35px", fontSize: "18px" }}>사진 첨부하기</Button>
+                    <ButtonContainer>
+                        <input type="file" id="inputTag" style={{ display: 'none' }} onChange={handleImageChange} />
+                        <Button onClick={handleButtonClick}>사진 첨부하기</Button>
+                        {fileName && <FileName>{fileName}</FileName>} {/* 파일명이 있을 때만 표시 */}
                     </ButtonContainer>
                 </Container>
             )}

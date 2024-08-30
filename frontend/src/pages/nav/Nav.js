@@ -5,6 +5,7 @@ import Cookies from 'js-cookie';
 import axios from 'axios';
 
 const NavContainer = styled.div`
+  background: transparent;
   font-family: Title;
   display: flex;
   justify-content: space-between;
@@ -14,7 +15,10 @@ const NavContainer = styled.div`
 `;
 
 const Logo = styled.div`
-  font-weight: bold;
+  font-family: Title;
+  font-size: 30px;
+  cursor: pointer;
+  
 `;
 
 const LeftLinks = styled.div`
@@ -81,10 +85,14 @@ const Nav = () => {
         }
     };
 
+    const handleMain = () => {
+        navigate('/');
+    }
+
     return (
         <NavContainer>
             <LeftLinks>
-                <Logo>Logo</Logo>
+                <Logo onClick={handleMain}>Blue Memories</Logo>
                 <NavLink style={{ marginLeft: "40px" }} to="/calendar">일기장</NavLink>
                 <NavLink to="/shared-diary">교환일기</NavLink>
                 <NavLink to="/community">커뮤니티</NavLink>

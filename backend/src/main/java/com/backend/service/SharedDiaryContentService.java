@@ -2,21 +2,17 @@ package com.backend.service;
 
 import com.backend.domain.SharedDiary;
 import com.backend.domain.SharedDiaryContent;
-import com.backend.domain.SharedDiaryUser;
 import com.backend.domain.User;
 import com.backend.dto.SentimentResult;
 import com.backend.dto.SharedDiaryContentRequest;
 import com.backend.repository.SharedDiaryContentRepository;
 import com.backend.repository.SharedDiaryRepository;
-import com.backend.repository.SharedDiaryUserRepository;
 import com.backend.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.time.LocalDate;
-import java.time.YearMonth;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -69,7 +65,7 @@ public class SharedDiaryContentService {
         content.setConfidenceNeutral(confidenceNeutral);
         content.setConfidencePositive(confidencePositive);
 
-        List<String> recommendations = recommendService.recommendSearch(confidencePositive, confidenceNeutral, confidenceNegative);
+        List<String> recommendations = recommendService.recommendSearchWord(confidencePositive, confidenceNeutral, confidenceNegative);
         content.setKeyword1(recommendations.get(0));
         content.setKeyword2(recommendations.get(1));
         content.setKeyword3(recommendations.get(2));
@@ -90,6 +86,12 @@ public class SharedDiaryContentService {
         return sharedDiaryContentRepository.save(content);
     }
 
+    // 공유 일기장 컨텐츠 ID로 컨텐츠 데이터 로드
+    public SharedDiaryContentRequest getSharedDiaryContentById(Long sharedDiaryContentId){
+        Optional<SharedDiaryContent> sharedDiaryContent = sharedDiaryContentRepository.findById(sharedDiaryContentId);
+        return convertToDto(sharedDiaryContent.get());
+    }
+
     // 공유 일기장 ID로 모든 컨텐츠 조회
     public List<SharedDiaryContentRequest> getSharedDiaryContentsBySharedDiaryId(Long sharedDiaryId) {
         SharedDiary sharedDiary = sharedDiaryRepository.findById(sharedDiaryId)
@@ -105,7 +107,7 @@ public class SharedDiaryContentService {
     public List<SharedDiaryContentRequest> getSharedDiaryContentsOrderByAsc(Long sharedDiaryId) {
         SharedDiary sharedDiary = sharedDiaryRepository.findById(sharedDiaryId)
                 .orElseThrow(() -> new RuntimeException("Shared diary not found"));
-        return sharedDiaryContentRepository.findBySharedDiaryOrderByCreatedAtAsc(sharedDiary)
+        return sharedDiaryContentRepository.findBySharedDiaryOrderByDateAsc(sharedDiary)
                 .stream()
                 .map(this::convertToDto)
                 .collect(Collectors.toList());
@@ -115,7 +117,7 @@ public class SharedDiaryContentService {
     public List<SharedDiaryContentRequest> getSharedDiaryContentsOrderByDesc(Long sharedDiaryId) {
         SharedDiary sharedDiary = sharedDiaryRepository.findById(sharedDiaryId)
                 .orElseThrow(() -> new RuntimeException("Shared diary not found"));
-        return sharedDiaryContentRepository.findBySharedDiaryOrderByCreatedAtDesc(sharedDiary)
+        return sharedDiaryContentRepository.findBySharedDiaryOrderByDateDesc(sharedDiary)
                 .stream()
                 .map(this::convertToDto)
                 .collect(Collectors.toList());
@@ -150,6 +152,7 @@ public class SharedDiaryContentService {
     private SharedDiaryContentRequest convertToDto(SharedDiaryContent content) {
         SharedDiaryContentRequest dto = new SharedDiaryContentRequest();
         String nickname = content.getUser().getNickname();
+        dto.setId(content.getId());
         dto.setTitle(content.getTitle());
         dto.setContent(content.getContent());
         dto.setWeather(content.getWeather());

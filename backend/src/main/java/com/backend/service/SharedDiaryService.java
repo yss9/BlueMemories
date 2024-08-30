@@ -83,7 +83,7 @@ public class SharedDiaryService {
         sharedDiaryContent.setSentiment(sentiment);
         sharedDiaryContent.setUser(userRepository.findByUserId(userId));
 
-        List<String> recommendations = recommendService.recommendSearch(confidencePositive, confidenceNeutral, confidenceNegative);
+        List<String> recommendations = recommendService.recommendSearchWord(confidencePositive, confidenceNeutral, confidenceNegative);
         sharedDiaryContent.setKeyword1(recommendations.get(0));
         sharedDiaryContent.setKeyword2(recommendations.get(1));
         sharedDiaryContent.setKeyword3(recommendations.get(2));
@@ -139,7 +139,6 @@ public class SharedDiaryService {
                 .orElseThrow(() -> new RuntimeException("Shared diary not found"));
 
         List<SharedDiaryUser> bySharedDiary = sharedDiaryUserRepository.findBySharedDiary(sharedDiary);
-        System.out.println("bySharedDiary = " + bySharedDiary);
         // 멤버들의 닉네임을 추출하여 리스트로 반환
         return bySharedDiary.stream()
                 .map(sharedDiaryUser -> sharedDiaryUser.getUser().getNickname())

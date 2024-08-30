@@ -9,7 +9,8 @@ import happyImage from '../diary/images/happy.png';
 import neutralImage from '../diary/images/neutral.png';
 import sadImage from '../diary/images/sad.png';
 import YouTube from 'react-youtube';
-import likeImage from '../images/likebutton.png';
+import notPushLikeImage from '../images/likeFalseButton.png';
+import PushLikeImage from '../images/likeTrueButton.png';
 import commentImage from '../images/commentbutton.png';
 import refreshImage from '../images/refreshbutton.png';
 
@@ -27,7 +28,7 @@ const BackGround = styled.div`
 const Container = styled.div`
   margin: 0 auto;
   width: 90%;
-  max-width: 900px;
+  max-width: 1000px;
   padding-top: 30px;
   position: relative;
   z-index: 1;
@@ -37,23 +38,24 @@ const Container = styled.div`
 `;
 
 const ElementDiv = styled.div`
-  margin-right: 20px;
+  width: 100px;
+  margin-right: 10px;
   display: inline-block;
-  float: right;
+  padding: 3px 20px;
 `;
 
 const SentimentImage = styled.img`
   width: 25px;
-  margin-right: 80px;
+  margin-right: 10px;
 `;
 
 const SentimentBox = styled.div`
-  padding-left: 17px;
+  display: inline-block;
   font-family: Content;
+  
   label {
     font-family: Title;
     font-size: 20px;
-    padding-right: 20px;
   }
 `;
 
@@ -62,6 +64,7 @@ const NicknameBox = styled.div`
   width: 100%;
   margin-top: 10px;
   font-family: Content;
+  color: rgba(94, 120, 100, 1);
   font-size: 20px;
 `;
 
@@ -77,7 +80,7 @@ const ImageWrapper = styled.div`
   display: inline-block;
   float: left;
   margin: 10px 30px 10px 10px;
-  max-width: 500px;
+  max-width: 600px;
   max-height: 300px;
 `;
 
@@ -107,11 +110,13 @@ const RefreshButton = styled.button`
 `;
 
 const StateBox = styled.div`
-  width: 100%;
+  width: 40%;
   margin-top: 20px;
-
-  div {
+  display: inline-block;
+  color : rgba(94, 120, 100, 1);
+  p {
     display: inline-block;
+    margin-left:18px;
     font-family: Title;
     font-size: 25px;
   }
@@ -181,11 +186,12 @@ const CommentWriteButton = styled.button`
   height: 25px;
   font-family: Content;
   font-size: 14px;
-  margin-left: 78%;
-  margin-top: -30px;
+  float: right;
+  bottom: 40px;
+  right: 20px;
+  position: relative;
   color: white;
   z-index: 2;
-  position: absolute;
   cursor: pointer;
 `;
 
@@ -232,7 +238,7 @@ const CommunityDiaryPage = () => {
     const [comments, setComments] = useState([]);
     const [newComment, setNewComment] = useState('');
     const [isLike, setIsLike] = useState(false);
-
+    const likeImage = isLike?`${PushLikeImage}`:`${notPushLikeImage}`;
 
     useEffect(() => {
         const token = Cookies.get('token');
@@ -322,16 +328,17 @@ const CommunityDiaryPage = () => {
 
     if (!diary) return <div>Loading...</div>;
 
-    const { title, content, weather, negative, positive, neutral, likeNum, sentiment, imageUrl, keyword1, keyword2, keyword3, keyword4 } = diary;
+    const { title, content, weather, negative, positive, neutral, likeNum, confidence, imageUrl, keyword1, keyword2, keyword3, keyword4 } = diary;
 
     const posit = Math.round(positive);
     const neut = Math.round(neutral);
     const negat = 100 - posit - neut;
 
     let todaySentiment = '';
-    if (sentiment === 'neutral') {
-        todaySentiment = '보통인';
-    } else if (sentiment === 'positive') {
+
+    if (confidence === 'neutral') {
+        todaySentiment = '그저 그런';
+    } else if (confidence === 'positive') {
         todaySentiment = '좋은';
     } else {
         todaySentiment = '안 좋은';
@@ -360,40 +367,38 @@ const CommunityDiaryPage = () => {
         <BackGround>
             <Nav/>
             <Container>
+                <div style={{width: '100%', height: '20px'}}>
+                    <NicknameBox>{diary.nickname}의 일기</NicknameBox>
+                </div>
+                <div style={{width: '60%', height: '30px', marginTop: '30px',display:"inline-block"}}>
+                    <label style={{fontFamily: 'Title', fontSize: '40px'}}>{title}</label>
+                </div>
+                <StateBox>
+                    <p>날씨</p>
+                    <p style={{fontFamily:"Content", fontSize:"18px",marginRight:"20px"}}>{weather}</p>
+                    <p>날짜</p>
+                    <p style={{fontFamily:"Content", fontSize:"18px"}}>{diary.date}</p>
+                </StateBox>
                 <div style={{width: '100%', height: '40px'}}>
-                    <ElementDiv>
-                        <SentimentImage src={sadImage}></SentimentImage>
-                        <SentimentBox>
-                            <label>부정</label> {negat}%
-                        </SentimentBox>
-                    </ElementDiv>
-                    <ElementDiv>
-                        <SentimentImage src={neutralImage}></SentimentImage>
-                        <SentimentBox>
-                            <label>중립</label> {neut}%
-                        </SentimentBox>
-                    </ElementDiv>
-                    <ElementDiv>
+                    <ElementDiv style={{backgroundColor:"rgba(179, 246, 202, 1)"}}>
                         <SentimentImage src={happyImage}></SentimentImage>
                         <SentimentBox>
                             <label>긍정</label> {posit}%
                         </SentimentBox>
                     </ElementDiv>
+                    <ElementDiv style={{backgroundColor:"rgba(184, 232, 234, 1)"}}>
+                        <SentimentImage src={neutralImage}></SentimentImage>
+                        <SentimentBox>
+                            <label>중립</label> {neut}%
+                        </SentimentBox>
+                    </ElementDiv>
+                    <ElementDiv style={{backgroundColor:"rgba(124, 157, 132, 1)"}}>
+                        <SentimentImage src={sadImage}></SentimentImage>
+                        <SentimentBox>
+                            <label>부정</label> {negat}%
+                        </SentimentBox>
+                    </ElementDiv>
                 </div>
-                <div style={{width: '100%', height: '20px'}}>
-                    <NicknameBox>{diary.nickname}님의 일기</NicknameBox>
-                </div>
-                <div style={{width: '100%', height: '30px', marginTop: '30px'}}>
-                    <label style={{fontFamily: 'Title', fontSize: '40px'}}>{title}</label>
-                </div>
-                <StateBox>
-                    <div>날씨</div>
-                    <div style={{marginLeft: '30px', fontFamily: 'Content', fontSize: '18px'}}>{weather}</div>
-                    <div style={{float: 'right', marginRight: '150px'}}>
-                        <div>날짜</div>
-                        <div style={{marginLeft: '30px', fontFamily: 'Content', fontSize: '18px'}}>{diary.date}</div>
-                    </div>
-                </StateBox>
                 <ContentContainer hasImage={Boolean(imageUrl)}>
                     <ImageWrapper hasImage={Boolean(imageUrl)}>
                         {imageUrl && (

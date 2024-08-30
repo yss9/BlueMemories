@@ -6,6 +6,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class SharedDiaryContentRequest {
+    private Long id;
     private String content;
     private String title;
     private String weather;

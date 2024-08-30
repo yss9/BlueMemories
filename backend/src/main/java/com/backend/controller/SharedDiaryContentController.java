@@ -63,4 +63,8 @@ public class SharedDiaryContentController {
         return sharedDiaryContentService.searchContentsByNickname(nickname);
     }
 
+    @GetMapping("/get-content/{id}")
+    public SharedDiaryContentRequest getContentById(@PathVariable Long id){
+        return sharedDiaryContentService.getSharedDiaryContentById(id);
+    }
 }

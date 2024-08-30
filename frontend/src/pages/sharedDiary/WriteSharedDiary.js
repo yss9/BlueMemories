@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import Nav from "../nav/Nav";
@@ -176,6 +176,7 @@ const WriteSharedDiaryForm = () => {
     const [isToggled, setIsToggled] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [image, setImage] = useState(null);
+    const fileInputRef = useRef(null);
     const today = new Date();
 
     // 연도, 월, 일을 가져와서 원하는 형식으로 포맷
@@ -186,7 +187,6 @@ const WriteSharedDiaryForm = () => {
     const formattedDate = `${year}-${month}-${day}`;
 
     const [date, setDate] = useState(formattedDate);
-
 
     useEffect(() => {
         if (location.state && location.state.date) {
@@ -200,6 +200,10 @@ const WriteSharedDiaryForm = () => {
 
     const handleImageChange = (e) => {
         setImage(e.target.files[0]);
+    };
+
+    const handleButtonClick = () => {
+        fileInputRef.current.click();
     };
 
     const handleSubmit = async (e) => {
@@ -259,34 +263,76 @@ const WriteSharedDiaryForm = () => {
                             </SwitchContainer>
                         </LeftContainer>
                         <RightContainer>
-                            <Button style={{ backgroundColor: "white", color: "black", border: "0.5px solid rgba(94, 120, 100, 1)" }}>저장</Button>
+                            <Button
+                                style={{
+                                    backgroundColor: "white",
+                                    color: "black",
+                                    border: "0.5px solid rgba(94, 120, 100, 1)"
+                                }}
+                            >
+                                저장
+                            </Button>
                             <Button onClick={handleSubmit} primary>발행</Button>
                         </RightContainer>
                     </TopContainer>
                     <InputField>
                         <label>제목</label>
-                        <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="제목" />
+                        <input
+                            type="text"
+                            value={title}
+                            onChange={(e) => setTitle(e.target.value)}
+                            placeholder="제목"
+                        />
                     </InputField>
                     <TwoColumnContainer>
                         <ColumnBox>
                             <label>날씨</label>
-                            <input type="text" value={weather} onChange={(e) => setWeather(e.target.value)} placeholder="날씨" />
+                            <input
+                                type="text"
+                                value={weather}
+                                onChange={(e) => setWeather(e.target.value)}
+                                placeholder="날씨"
+                            />
                         </ColumnBox>
                         <ColumnBox>
                             <label>날짜</label>
-                            <input type="text" value={date} onChange={(e) => setDate(e.target.value)} placeholder="2000-00-00"  />
+                            <input
+                                type="text"
+                                value={date}
+                                onChange={(e) => setDate(e.target.value)}
+                                placeholder="2000-00-00"
+                            />
                         </ColumnBox>
                     </TwoColumnContainer>
-                    <LargeInput value={content} onChange={(e) => setContent(e.target.value)} placeholder="본문" />
-                    <div style={{fontFamily:"Content"}}>글자 수는 1000자를 초과할 수 없습니다. 현재 글자 수 : {content.length}</div>
+                    <LargeInput
+                        value={content}
+                        onChange={(e) => setContent(e.target.value)}
+                        placeholder="본문"
+                    />
+                    <div style={{fontFamily:"Content"}}>
+                        글자 수는 1000자를 초과할 수 없습니다. 현재 글자 수 : {content.length}
+                    </div>
                     <ButtonContainer style={{ float: "left" }}>
-                        <input type="file" id="inputTag" onChange={handleImageChange}  />
-                        <Button style={{ width: "120px", height: "35px", fontSize: "18px" }}>사진 첨부하기</Button>
+                        <input
+                            type="file"
+                            ref={fileInputRef}
+                            onChange={handleImageChange}
+                            style={{ display: 'none' }}
+                        />
+                        <Button
+                            onClick={handleButtonClick}
+                            style={{
+                                width: "120px",
+                                height: "35px",
+                                fontSize: "18px"
+                            }}
+                        >
+                            사진 첨부하기
+                        </Button>
                     </ButtonContainer>
                 </Container>
             )}
         </div>
     );
 };
-
 export default WriteSharedDiaryForm;
