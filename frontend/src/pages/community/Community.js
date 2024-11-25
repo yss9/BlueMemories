@@ -131,7 +131,7 @@ const ArrowButton = styled.button`
 
 const CommunityForm = () => {
     const [diaries, setDiaries] = useState([]);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [currentPage, setCurrentPage] = useState(1);
     const diariesPerPage = 30; // 페이지당 보여줄 일기 개수

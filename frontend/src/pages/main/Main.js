@@ -16,13 +16,16 @@ import mainBackground from "./image/mainBackground.png";
 import happy from "../images/happy.png";
 import neutral from "../images/neutral.png";
 import sad from "../images/sad.png";
+import topMain from "./image/topMain.png";
+import {useNavigate} from "react-router-dom";
 
 const Container = styled.div`
   margin: 0 auto;
   width: 100%;
   scroll-snap-type: y mandatory;
   overflow-y: scroll;
-  height: 100vh;
+  height: 94.8vh;
+    scrollbar-width: none;
 `;
 
 const WelcomeMessage = styled.div`
@@ -32,15 +35,16 @@ const WelcomeMessage = styled.div`
 `;
 
 const ContainerTop = styled.div`
-  background-color: white;
-  height: 93vh;
+  background-image: url("${topMain}");
+    background-size:cover;
+  height: 100%;
   scroll-snap-align: center;
 `;
 
 const ContainerMiddleTop = styled.div`
   background-repeat: repeat;
   background-image: url("${diaryBackground}");
-  height: 100vh;
+  height: 100%;
   width: 100%;
   display: flex;
   scroll-snap-align: center;
@@ -49,7 +53,7 @@ const ContainerMiddleTop = styled.div`
 const ContainerMiddleBottom = styled.div`
   vertical-align: center;
   background-color: rgba(242, 255, 249, 1);
-  height: 100vh;
+    height: 100%;
   scroll-snap-align: center;
   p{
     font-family: Title;
@@ -57,10 +61,9 @@ const ContainerMiddleBottom = styled.div`
 `;
 
 const ContainerBottomTop = styled.div`
-  text-align: center;
-  padding-top: 100px;
-  background: linear-gradient(to bottom, #a0f9c8, #d4f4fa);
-  height: 100vh;
+    background: linear-gradient(180deg, #BAFFC9 0%, #B8EBFF 100%);
+    text-align: center;
+    height: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -68,12 +71,34 @@ const ContainerBottomTop = styled.div`
 `;
 
 const ContainerBottomBottom = styled.div`
-  height: 100vh;
+    height: 100%;
   background-image: url("${mainBackground}");
   background-repeat: no-repeat;
   background-size: cover;
   scroll-snap-align: center;
+    text-align: center;
 `;
+
+const BottomBottomBox = styled.div`
+    font-family: Content;
+    font-size:25px;
+    color:#5E7864;
+    padding-top: 23%;
+    
+`
+
+const WriteTextButton = styled.button`
+    width: 170px;
+    height: 45px;
+    border: none;
+    text-align: center;
+    font-family: Content;
+    font-size: 25px;
+    color: white;
+    background-color: #5E7864;
+    border-radius: 15px;
+    margin-top:10%;
+`
 
 const ButtonContainer = styled.div`
   display: flex;
@@ -82,13 +107,13 @@ const ButtonContainer = styled.div`
   padding: 30px 0px 0px 60px;
   gap: 30px;
   width: 30%;
-  height: 700px;
+  height: 100%;
 `;
 
 const Button = styled.div`
   font-family: Title;
-  width: 350px;
-  height: 150px;
+  width: 398px;
+  height: 170px;
   font-size: 36px;
   background-color: transparent;
   color: black;
@@ -124,7 +149,7 @@ const slideIn = keyframes`
 const ContentContainer = styled.div`
   width: 70%;
   margin-top: 30px;
-  height: 700px;
+  height: 90%;
   background-color: #f0f0f0;
   background-image: ${({ backgroundImage }) => `url(${backgroundImage})`};
   background-size: cover;
@@ -181,6 +206,7 @@ const BottomTopContent = styled.div`
 const Title = styled.p`
   font-family: 'Title';
   font-size: 35px;
+    margin-top:100px;
   margin-bottom: 50px;
 `;
 
@@ -198,11 +224,11 @@ const CategoryButton = styled.button`
   border: none;
   border-radius: 10px;
   padding: 10px 20px;
-  font-size: 18px;
+  font-size: 25px;
   cursor: pointer;
   white-space: nowrap;
   transition: background-color 0.3s;
-
+    margin-bottom:20px;
   &:hover {
     background-color: #d4f4fa;
   }
@@ -220,7 +246,7 @@ const CardWrapper = styled.div`
   -webkit-overflow-scrolling: touch;
   width: 80%;
   padding: 20px;
-  gap: 20px;
+  gap: 50px;
   &::-webkit-scrollbar {
     display: none; /* Hide scrollbar for better UX */
   }
@@ -263,15 +289,15 @@ const categories = [
 
 const MainPage = () => {
     const [nickname, setNickname] = useState('');
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState('');
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(true);
     const [activeContent, setActiveContent] = useState(null);
     const diaryInfoText = "작성된 일기를 분석해서\n긍정, 중립, 부정 수치를 나타내줘요.";
     const sharedDiaryInfoText = " 지인들과 함께 기록하는\n공유일기를 작성할 수 있어요."
     const communityInfoText = "다른 사람들과 일기를 공유하고\n댓글 및 좋아요를 남길 수 있어요.";
     const todayRecommendInfoText = "작성한 일기의 내용과 어울리는\n노래를 추천 받을 수 있어요.";
     const SentimentInfoText = "BlueMemories 만의\n특별한 감정을 만나볼 수 있어요.";
-
+    const navigate = useNavigate();
 
     const [activeCategoryIndex, setActiveCategoryIndex] = useState(0);
     const cardWrapperRef = useRef(null);
@@ -308,7 +334,7 @@ const MainPage = () => {
                     setLoading(false);
                 });
         } else {
-            setError('로그인 토큰이 없습니다.');
+            setError(false);
             setLoading(false);
         }
     }, []);
@@ -326,12 +352,14 @@ const MainPage = () => {
         };
     }, [cardWrapperRef]);
 
-    if (loading) {
-        return <div>로딩 중...</div>;
-    }
 
-    if (error) {
-        return <div>{error}</div>;
+    const CheckLogin = () =>{
+        if(error){
+            navigate('/calendar')
+        }
+        else{
+            alert("로그인을 해주세요!")
+        }
     }
 
     return (
@@ -339,7 +367,7 @@ const MainPage = () => {
             <Nav />
             <Container>
                 <ContainerTop>
-                    <WelcomeMessage>안녕하세요, {nickname}님! BlueMemories와 함께 다양한 일기를 작성해보세요!</WelcomeMessage>
+
                 </ContainerTop>
                 <ContainerMiddleTop>
                     <ButtonContainer>
@@ -438,7 +466,8 @@ const MainPage = () => {
                     </CardWrapper>
                 </ContainerBottomTop>
                 <ContainerBottomBottom>
-
+                    <BottomBottomBox>BlueMemories와 함께 <br/>다양한 일기를 작성해보세요!</BottomBottomBox>
+                    <WriteTextButton onClick={CheckLogin} >일기 쓰기</WriteTextButton>
                 </ContainerBottomBottom>
             </Container>
         </div>
