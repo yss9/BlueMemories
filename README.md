@@ -73,6 +73,8 @@ graph TD
 
 ## 📸 주요 기능 (Key Features)
 
+**AWS 비용 및 중지된 API로 인해 서비스가 일시 중지되어, Figma 디자인 시안으로 기능을 소개합니다.**
+
 | 기능 1. 감정 분석 및 AI 추천 |
 | :--- |
 | **"내 감정을 숫자로, 내 기분을 노래로"** <br> 일기를 쓰면 긍정, 중립, 부정 수치가 나타나며, <br> 오늘의 기분에 맞는 유튜브 영상을 추천해드립니다. |
@@ -116,6 +118,3 @@ graph TD
 
 ---
 
-## 📖 설치 및 실행 (Getting Started)
-
-상세한 환경 변수 설정 방법과 로컬 실행 가이드는 [Wiki: Setup Guide](https://github.com/yss9/BlueMemories/wiki/Setup-Guide)를 참고해주세요.
