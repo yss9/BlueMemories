@@ -22,45 +22,66 @@
 
 ```mermaid
 graph TD
-    %% 1. 사용자 & 프론트엔드
-    subgraph Client_Side [Client Side]
-        User((User))
-        Frontend[Frontend<br/>React.js]
+    %% --- 스타일 정의 (BlueMemories 테마: 블루 & 그린) ---
+    classDef frontend fill:#E3F2FD,stroke:#1E88E5,stroke-width:2px,color:#0D47A1;
+    classDef backend fill:#E8F5E9,stroke:#43A047,stroke-width:2px,color:#1B5E20;
+    classDef data fill:#FFF3E0,stroke:#FB8C00,stroke-width:2px,color:#E65100;
+    classDef external fill:#F3E5F5,stroke:#8E24AA,stroke-width:2px,color:#4A148C;
+    classDef user fill:#333,stroke:#333,stroke-width:0px,color:#fff;
+
+    %% --- 노드 정의 ---
+    User((User)):::user
+
+    subgraph Client [Frontend Layer]
+        direction TB
+        React[React.js]:::frontend
     end
 
-    %% 2. 백엔드 & 데이터베이스
-    subgraph Server_Side [Server Side]
-        Backend[Backend API Server<br/>Spring Boot]
-        DB[(Database<br/>MySQL)]
+    subgraph Server [Backend Layer]
+        direction TB
+        Controller[Spring Boot Controller]:::backend
+        Security[Spring Security / JWT]:::backend
+        Service[Business Logic]:::backend
+        WebClient[Spring WebClient]:::backend
     end
 
-    %% 3. 인프라 & 외부 API
-    subgraph Cloud_Infrastructure [Infrastructure & APIs]
-        S3[Image Storage<br/>AWS S3]
-        
-        subgraph AI_Services [AI & Content]
-            Naver[Sentiment Analysis<br/>Naver Clova]
-            GPT[Keyword Recommendation<br/>OpenAI GPT]
-            YouTube[Video Content<br/>YouTube API]
-        end
+    subgraph Infrastructure [Data & Infra Layer]
+        direction TB
+        MySQL[(MySQL / JPA)]:::data
+        S3[AWS S3 Bucket]:::data
     end
 
-    %% --- 연결선 (데이터 흐름) ---
-    User -->|Action| Frontend
-    Frontend <-->|REST API / JSON| Backend
-    Backend <-->|JPA / Query| DB
+    subgraph External_API [External Services]
+        direction TB
+        Naver[Naver Clova Sentiment]:::external
+        OpenAI[OpenAI GPT-3.5]:::external
+        YouTube[YouTube Data API]:::external
+    end
 
-    %% 외부 연동
-    Backend -->|Upload Image| S3
-    Backend -->|1. Analyze Text| Naver
-    Backend -->|2. Request Keywords| GPT
-    Backend -->|3. Search Video| YouTube
+    %% --- 연결 관계 ---
+    %% 1. 유저 -> 프론트
+    User -->|User Action| React
 
-    %% 깔끔한 스타일링
-    style Frontend fill:#E3F2FD,stroke:#1565C0,stroke-width:2px
-    style Backend fill:#E8F5E9,stroke:#2E7D32,stroke-width:2px
-    style DB fill:#FFF3E0,stroke:#EF6C00,stroke-width:2px
-    style Cloud_Infrastructure fill:#F5F5F5,stroke:#616161,stroke-width:2px,stroke-dasharray: 5 5
+    %% 2. 프론트 -> 백엔드
+    React -- "REST API (JSON)" --> Controller
+
+    %% 3. 백엔드 내부 흐름
+    Controller --> Security
+    Security --> Service
+    
+    %% 4. 백엔드 -> 데이터/인프라
+    Service -- "User/Diary Data" --> MySQL
+    Service -- "Image Upload" --> S3
+
+    %% 5. 백엔드 -> 외부 API (핵심 기능)
+    Service -- "Async Request" --> WebClient
+    WebClient -- "1. Sentiment Analysis" --> Naver
+    WebClient -- "2. Content Recommend" --> OpenAI
+    WebClient -- "3. Video Search" --> YouTube
+
+    %% 6. 데이터 반환
+    Naver & OpenAI & YouTube -.->|Response| WebClient
+    WebClient -.->|Result| Service
 ```
 
 ### ⚙️ 핵심 프로세스
