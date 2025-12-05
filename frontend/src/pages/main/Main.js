@@ -16,7 +16,7 @@ import mainBackground from "./image/mainBackground.png";
 import happy from "../images/happy.png";
 import neutral from "../images/neutral.png";
 import sad from "../images/sad.png";
-import topMain from "./image/topMain.png";
+import topMain from "./image/topmain.png";
 import {useNavigate} from "react-router-dom";
 
 const Container = styled.div`

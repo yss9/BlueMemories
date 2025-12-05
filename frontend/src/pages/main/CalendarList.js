@@ -130,8 +130,9 @@ const SearchInput = styled.input`
 
 const SearchButton = styled.button`
   background-color: #5e7864;
+    font-family: Content;
   color: white;
-  font-size: 15px;
+  font-size: 20px;
   border: none;
   padding: 5px 15px;
   border-radius: 5px;

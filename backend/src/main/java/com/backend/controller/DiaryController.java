@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import reactor.core.publisher.Mono;
 
 import java.util.HashMap;
 import java.util.List;
@@ -20,8 +21,8 @@ public class DiaryController {
     private DiaryServiceImpl diaryServiceImpl;
 
     @PostMapping("/diaries")
-    public Diary createDiary(@RequestPart("diary") DiaryDto diaryDto,
-                             @RequestPart(value = "image", required = false) MultipartFile imageFile) {
+    public Mono<Diary> createDiary(@RequestPart("diary") DiaryDto diaryDto,
+                                   @RequestPart(value = "image", required = false) MultipartFile imageFile) {
         String userId = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return diaryServiceImpl.createDiary(diaryDto, userId, imageFile);
     }
