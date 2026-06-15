@@ -83,7 +83,7 @@ public class SharedDiaryService {
         sharedDiaryContent.setSentiment(sentiment);
         sharedDiaryContent.setUser(userRepository.findByUserId(userId));
 
-        List<String> recommendations = recommendService.recommendSearchWord(confidencePositive, confidenceNeutral, confidenceNegative);
+        List<String> recommendations = recommendService.recommendSearchWord(confidencePositive, confidenceNeutral, confidenceNegative).block();
         sharedDiaryContent.setKeyword1(recommendations.get(0));
         sharedDiaryContent.setKeyword2(recommendations.get(1));
         sharedDiaryContent.setKeyword3(recommendations.get(2));

@@ -65,7 +65,7 @@ public class SharedDiaryContentService {
         content.setConfidenceNeutral(confidenceNeutral);
         content.setConfidencePositive(confidencePositive);
 
-        List<String> recommendations = recommendService.recommendSearchWord(confidencePositive, confidenceNeutral, confidenceNegative);
+        List<String> recommendations = recommendService.recommendSearchWord(confidencePositive, confidenceNeutral, confidenceNegative).block();
         content.setKeyword1(recommendations.get(0));
         content.setKeyword2(recommendations.get(1));
         content.setKeyword3(recommendations.get(2));
