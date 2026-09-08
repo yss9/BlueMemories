@@ -32,7 +32,11 @@ public class OpenAIService implements AiChatClient {
 
     @Override
     public Mono<String> getChatResponse(String prompt) {
-        OpenAIRequest request = new OpenAIRequest(model, List.of(new OpenAIRequest.Message("user", prompt)));
+        OpenAIRequest request = new OpenAIRequest(
+                model,
+                List.of(new OpenAIRequest.Message("user", prompt)),
+                new OpenAIRequest.ResponseFormat("json_object")
+        );
 
         return webClient.post()
                 .uri("/chat/completions")

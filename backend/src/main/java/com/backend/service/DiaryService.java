@@ -3,6 +3,9 @@ package com.backend.service;
 import com.backend.domain.Diary;
 import com.backend.dto.DiaryDto;
 import com.backend.dto.DiarySentimentDto;
+import com.backend.dto.PublicDiaryListResponse;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
 import reactor.core.publisher.Mono;
 
@@ -13,5 +16,5 @@ public interface DiaryService {
     boolean checkDiaryExists(String userId, String date);
     DiaryDto getDiaryByDate(String userId, String date);
     List<DiarySentimentDto> getDiariesByMonth(String userId, int year, int month);
-    List<DiaryDto> getDiariesByPublic();
+    Page<PublicDiaryListResponse> getDiariesByPublic(Pageable pageable);
 }

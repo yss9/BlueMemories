@@ -3,8 +3,14 @@ package com.backend.controller;
 import com.backend.domain.Diary;
 import com.backend.dto.DiaryDto;
 import com.backend.dto.DiarySentimentDto;
+import com.backend.dto.PublicDiaryListResponse;
 import com.backend.service.DiaryServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -21,10 +27,11 @@ public class DiaryController {
     private DiaryServiceImpl diaryServiceImpl;
 
     @PostMapping("/diaries")
-    public Mono<Diary> createDiary(@RequestPart("diary") DiaryDto diaryDto,
-                                   @RequestPart(value = "image", required = false) MultipartFile imageFile) {
+    public Mono<ResponseEntity<Void>> createDiary(@RequestPart("diary") DiaryDto diaryDto,
+                                                  @RequestPart(value = "image", required = false) MultipartFile imageFile) {
         String userId = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        return diaryServiceImpl.createDiary(diaryDto, userId, imageFile);
+        return diaryServiceImpl.createDiary(diaryDto, userId, imageFile)
+                .thenReturn(ResponseEntity.ok().build());
     }
 
     @GetMapping("/check/{date}")
@@ -51,8 +58,9 @@ public class DiaryController {
     }
 
     @GetMapping("/diaries/users")
-    public List<DiaryDto> getDiariesByPublic(){
-        return diaryServiceImpl.getDiariesByPublic();
+    public Page<PublicDiaryListResponse> getDiariesByPublic(
+            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+        return diaryServiceImpl.getDiariesByPublic(pageable);
     }
 
 

@@ -3,6 +3,8 @@ package com.backend.service;
 import com.backend.dto.AiRecommendationResponse;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
@@ -12,6 +14,7 @@ import java.util.List;
 @Service
 public class RecommendService {
 
+    private static final Logger log = LoggerFactory.getLogger(RecommendService.class);
     private static final int MAX_ATTEMPTS = 2;
     private static final List<String> FALLBACK_SONGS = List.of("잔잔한 위로 노래", "기분 전환 노래");
     private static final List<String> FALLBACK_SEARCH_KEYWORDS = List.of("힐링 브이로그", "마음이 편안해지는 영상");
@@ -56,9 +59,11 @@ public class RecommendService {
                     }
                 })
                 .onErrorResume(error -> {
+                    log.warn("AI recommendation attempt {} failed: {}", attempt, error.getMessage());
                     if (attempt < MAX_ATTEMPTS) {
                         return recommendAttempt(retryPrompt, retryPrompt, attempt + 1);
                     }
+                    log.warn("AI recommendation failed after {} attempts. Using fallback recommendations.", MAX_ATTEMPTS);
                     return Mono.just(fallbackRecommendations());
                 });
     }
@@ -91,8 +96,22 @@ public class RecommendService {
     }
 
     private AiRecommendationResponse parseRecommendations(String response) throws Exception {
-        JsonNode node = objectMapper.readTree(response);
+        JsonNode node = objectMapper.readTree(extractJson(response));
         return objectMapper.treeToValue(node, AiRecommendationResponse.class);
+    }
+
+    private String extractJson(String response) {
+        if (response == null) {
+            throw new IllegalArgumentException("AI response is empty");
+        }
+
+        int start = response.indexOf('{');
+        int end = response.lastIndexOf('}');
+        if (start < 0 || end < start) {
+            throw new IllegalArgumentException("AI response does not contain a JSON object: " + response);
+        }
+
+        return response.substring(start, end + 1);
     }
 
     private void validate(AiRecommendationResponse recommendations) {

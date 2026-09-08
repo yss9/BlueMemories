@@ -27,7 +27,7 @@ public class Diary {
 
     private String date;
 
-    @Column(length = 1000)
+    @Column(columnDefinition = "TEXT")
     private String content;
 
     @ManyToOne

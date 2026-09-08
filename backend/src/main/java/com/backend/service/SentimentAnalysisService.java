@@ -4,12 +4,15 @@ import com.backend.dto.AiSentimentResponse;
 import com.backend.dto.SentimentResult;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
 @Service
 public class SentimentAnalysisService {
 
+    private static final Logger log = LoggerFactory.getLogger(SentimentAnalysisService.class);
     private static final int MAX_ATTEMPTS = 2;
 
     private final AiChatService aiChatService;
@@ -33,11 +36,13 @@ public class SentimentAnalysisService {
                 AiSentimentResponse sentiment = parseSentiment(response);
                 validate(sentiment);
                 return toSentimentResult(sentiment);
-            } catch (Exception ignored) {
+            } catch (Exception e) {
+                log.warn("AI sentiment analysis attempt {} failed: {}", attempt + 1, e.getMessage());
                 prompt = buildRetryPrompt(content);
             }
         }
 
+        log.warn("AI sentiment analysis failed after {} attempts. Using neutral fallback.", MAX_ATTEMPTS);
         return fallback();
     }
 
@@ -69,8 +74,22 @@ public class SentimentAnalysisService {
     }
 
     private AiSentimentResponse parseSentiment(String response) throws Exception {
-        JsonNode node = objectMapper.readTree(response);
+        JsonNode node = objectMapper.readTree(extractJson(response));
         return objectMapper.treeToValue(node, AiSentimentResponse.class);
+    }
+
+    private String extractJson(String response) {
+        if (response == null) {
+            throw new IllegalArgumentException("AI response is empty");
+        }
+
+        int start = response.indexOf('{');
+        int end = response.lastIndexOf('}');
+        if (start < 0 || end < start) {
+            throw new IllegalArgumentException("AI response does not contain a JSON object: " + response);
+        }
+
+        return response.substring(start, end + 1);
     }
 
     private void validate(AiSentimentResponse response) {

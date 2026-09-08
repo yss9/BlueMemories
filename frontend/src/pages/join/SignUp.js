@@ -1,12 +1,15 @@
 import React, { useState } from 'react';
 import styled from "styled-components";
 import { checkUserId, checkNickname, registerUser } from './api';
+import PageContainer from '../../components/layout/PageContainer';
 import { useNavigate } from "react-router-dom"; // API 호출 함수 임포트
 
-const Container = styled.div`
+const Container = styled(PageContainer).attrs({
+  $maxWidth: '660px',
+  $padding: '0 24px 40px',
+  $textAlign: 'center',
+})`
   text-align: center;
-  margin: 0 auto;
-  width: 660px;
 `;
 
 const FormBox = styled.div`
@@ -23,16 +26,19 @@ const LogoBox = styled.div`
 `;
 
 const InputBox = styled.input`
-  width: 500px;
+  width: 100%;
+  max-width: 500px;
   height: 47px;
   font-family: Content;
   border: 0.5px solid #5E7864;
   border-radius: 10px;
   padding-left: 15px;
+  box-sizing: border-box;
 `;
 
 const SignUpButton = styled.button`
-  width: 500px;
+  width: 100%;
+  max-width: 500px;
   height: 50px;
   font-family: Title;
   font-size: 25px;
@@ -49,15 +55,30 @@ const Message = styled.div`
   padding-top: 5px;
   margin-bottom: -30px;
   font-size: 13px;
-  color: ${props => (props.isError ? 'red' : 'rgba(94, 120, 100, 1)')};
+  color: ${props => (props.$isError ? 'red' : 'rgba(94, 120, 100, 1)')};
   font-family: Content;
   text-align: left;
   padding-left: 15px;
-  margin-left:60px;
+  max-width: 500px;
+  margin-left:auto;
+  margin-right:auto;
+  box-sizing: border-box;
 `;
 
 const InputContainer = styled.div`
   margin-bottom: 20px;
+`;
+
+const NicknameInputContainer = styled(InputContainer)`
+  margin-top: 5px;
+`;
+
+const AgreementRow = styled.div`
+  font-size: 15px;
+  font-family: Content;
+  max-width: 500px;
+  margin: 50px auto -35px;
+  text-align: left;
 `;
 
 const SignUpForm = () => {
@@ -163,7 +184,7 @@ const SignUpForm = () => {
                             value={userId}
                             onChange={handleUserIdChange}
                         />
-                        <Message isError={!!userIdError || isUserIdAvailable === false}>
+                        <Message $isError={!!userIdError || isUserIdAvailable === false}>
                             {userIdError || (isUserIdAvailable === false && '이미 사용 중인 아이디입니다.') || (isUserIdAvailable === true && '사용 가능한 아이디입니다.')}
                         </Message>
                     </InputContainer>
@@ -174,7 +195,7 @@ const SignUpForm = () => {
                             value={password}
                             onChange={handlePasswordChange}
                         />
-                        <Message isError={isPasswordValid === false}>
+                        <Message $isError={isPasswordValid === false}>
                             {isPasswordValid === false ? '비밀번호는 최소 8자, 대문자, 소문자, 숫자를 포함해야 합니다.' : isPasswordValid === true ? '사용할 수 있는 비밀번호입니다.' : ''}
                         </Message>
                     </InputContainer>
@@ -185,24 +206,24 @@ const SignUpForm = () => {
                             value={confirmPassword}
                             onChange={handleConfirmPasswordChange}
                         />
-                        <Message isError={isPasswordMatch === false}>
+                        <Message $isError={isPasswordMatch === false}>
                             {isPasswordMatch === false ? '비밀번호가 일치하지 않습니다.' : isPasswordMatch === true ? '비밀번호가 일치합니다.' : ''}
                         </Message>
                     </InputContainer>
-                    <InputContainer style={{marginTop:"5px"}}>
+                    <NicknameInputContainer>
                         <InputBox
                             type="text"
                             placeholder="닉네임"
                             value={nickname}
                             onChange={handleNicknameChange}
                         />
-                        <Message isError={!!nicknameError || isNicknameAvailable === false}>
+                        <Message $isError={!!nicknameError || isNicknameAvailable === false}>
                             {nicknameError || (isNicknameAvailable === false && '이미 사용 중인 닉네임입니다.') || (isNicknameAvailable === true && '사용 가능한 닉네임입니다.')}
                         </Message>
-                    </InputContainer>
-                    <div style={{fontSize:"15px", fontFamily:"Content", marginTop:"50px", paddingRight:"395px", marginBottom:"-35px"}}>
+                    </NicknameInputContainer>
+                    <AgreementRow>
                         <input type="checkbox" /> 인증 약관 전체동의
-                    </div>
+                    </AgreementRow>
                     <SignUpButton type="submit">회원가입</SignUpButton>
                 </form>
             </FormBox>

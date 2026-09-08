@@ -26,6 +26,8 @@ import java.util.stream.Collectors;
 @Service
 public class SharedDiaryService {
 
+    private static final String DEFAULT_COVER_IMAGE_KEY = "coverImage2";
+
     @Autowired
     private SharedDiaryRepository sharedDiaryRepository;
 
@@ -51,7 +53,9 @@ public class SharedDiaryService {
         User user = userRepository.findByUserId(userId);
         SharedDiary sharedDiary = new SharedDiary();
         sharedDiary.setTitle(request.getTitle());
-        sharedDiary.setCoverImageUrl(request.getCoverImageUrl());
+        sharedDiary.setCoverImageUrl(hasText(request.getCoverImageUrl())
+                ? request.getCoverImageUrl()
+                : DEFAULT_COVER_IMAGE_KEY);
         sharedDiary.setUser(user);
         sharedDiaryRepository.save(sharedDiary);
         SharedDiaryUser sharedDiaryUser = new SharedDiaryUser();
@@ -143,6 +147,10 @@ public class SharedDiaryService {
         return bySharedDiary.stream()
                 .map(sharedDiaryUser -> sharedDiaryUser.getUser().getNickname())
                 .collect(Collectors.toList());
+    }
+
+    private boolean hasText(String value) {
+        return value != null && !value.trim().isEmpty();
     }
 
 }

@@ -1,6 +1,5 @@
 package com.backend.controller;
 
-import com.backend.domain.Comment;
 import com.backend.dto.CreateCommentRequest;
 import com.backend.service.CommentService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +21,7 @@ public class CommentController {
     }
 
     @PostMapping("/create-comment")
-    public Comment createDiaryComment(@RequestBody CreateCommentRequest request){
+    public CreateCommentRequest createDiaryComment(@RequestBody CreateCommentRequest request){
         String userId = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return commentService.createDiaryComment(request.getDiaryId(), userId, request.getContent());
     }

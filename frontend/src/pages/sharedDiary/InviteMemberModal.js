@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import styled from 'styled-components';
 import axios from 'axios';
 import Cookies from 'js-cookie';
-import {useLocation} from "react-router-dom";
 import closeImage from "../images/closebButton.png";
 import searchImage from "../images/searchButton.png";
 
@@ -10,8 +9,9 @@ const ModalContainer = styled.div`
   background-color: white;
   padding: 20px;
   border-radius: 10px;
-  width: 400px;
-  height: 400px;
+  width: min(400px, calc(100vw - 32px));
+  min-height: 400px;
+  box-sizing: border-box;
   box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
   
   position: fixed;
@@ -28,14 +28,24 @@ const CloseButton = styled.button`
   background-image: url("${closeImage}");
   background-size: cover;
   border: none;
-  float: right;
+  margin-left: auto;
+  display: block;
   cursor: pointer;
 `
+
+const ModalTitleBar = styled.div`
+  width: 100%;
+  height: 50px;
+  text-align: center;
+  font-family: Title;
+  font-size: 30px;
+`;
 
 const InputContainer = styled.div`
   margin-bottom: 20px;
   display: flex;
   flex-direction: column;
+  position: relative;
 `;
 
 const SearchInput = styled.input`
@@ -47,6 +57,7 @@ const SearchInput = styled.input`
   border: 1px solid rgba(94, 120, 100, 1);
   border-radius: 5px;
   height: 20px;
+  padding-right: 42px;
 `;
 
 const SearchButton = styled.button`
@@ -58,12 +69,12 @@ const SearchButton = styled.button`
   border: none;
   cursor: pointer;
   position: absolute;
-  margin-left: 365px;
-  margin-top: 9px;
+  right: 10px;
+  top: 9px;
 `;
 
 const Message = styled.p`
-  color: ${props => (props.isError ? 'red' : 'black')};
+  color: ${props => (props.$isError ? 'red' : 'black')};
   font-family: Title;
   margin-top: 10px;
   font-size: 30px;
@@ -85,6 +96,16 @@ const InviteButton = styled.button`
   cursor: ${props => (props.disabled ? 'not-allowed' : 'pointer')};
   margin-top: 20px;
   width: 100%;
+`;
+
+const MessageTextarea = styled.textarea`
+  resize: none;
+  border: none;
+  background-color: rgba(184, 232, 234, 0.5);
+  border-radius: 10px;
+  height: 100px;
+  padding: 10px;
+  color: black;
 `;
 
 const InviteMemberModal = ({ member,sharedDiaryId, onClose }) => {
@@ -143,10 +164,10 @@ const InviteMemberModal = ({ member,sharedDiaryId, onClose }) => {
 
     return (
         <ModalContainer>
-            <div style={{width:"100%", height:"50px", textAlign:"center", fontFamily:"Title", fontSize:"30px"}}>
+            <ModalTitleBar>
                 친구초대
                 <CloseButton onClick={onClose}></CloseButton>
-            </div>
+            </ModalTitleBar>
             <InputContainer>
                 <SearchInput
                     type="text"
@@ -155,21 +176,11 @@ const InviteMemberModal = ({ member,sharedDiaryId, onClose }) => {
                     onChange={(e) => setReceiverId(e.target.value)}
                 />
                 <SearchButton onClick={handleSearch}></SearchButton>
-                {message && <Message isError={!isMemberFound}>{message} <span>{existMember}</span></Message>}
-                <textarea
+                {message && <Message $isError={!isMemberFound}>{message} <span>{existMember}</span></Message>}
+                <MessageTextarea
                     placeholder="메시지를 작성해주세요"
                     value={inviteMessage}
                     onChange={(e)=>setInviteMessage(e.target.value)}
-                    style={{
-                        resize: "none",
-                        border:"none",
-                        backgroundColor:"rgba(184, 232, 234, 0.5)",
-                        borderRadius:"10px",
-                        height:"100px",
-                        padding:"10px",
-                        color:"black",
-
-                    }}
                 />
             </InputContainer>
             <InviteButton onClick={handleInvite} disabled={!isMemberFound}>

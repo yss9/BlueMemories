@@ -1,17 +1,18 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import Nav from "../nav/Nav";
-import Cookies from "js-cookie";
 import axios from "axios";
 import LoadingAnimation from '../diary/LoadingAnimation';
+import { clearToken, getToken } from '../../authToken';
+import PageContainer from '../../components/layout/PageContainer';
 
-const Container = styled.div`
+const Container = styled(PageContainer).attrs({
+  $maxWidth: '900px',
+  $padding: '30px 24px 24px',
+  $textAlign: 'center',
+})`
   text-align: center;
-  margin: 0 auto;
-  width: 90%;
-  max-width: 900px;
-  padding-top: 30px;
 `;
 
 const TopContainer = styled.div`
@@ -54,13 +55,13 @@ const ToggleOption = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: ${(props) => (props.active ? '#566e56' : '#f0f8f0')};
-  color: ${(props) => (props.active ? '#ffffff' : '#999999')};
+  background-color: ${(props) => (props.$active ? '#566e56' : '#f0f8f0')};
+  color: ${(props) => (props.$active ? '#ffffff' : '#999999')};
   transition: background-color 0.3s, color 0.3s;
 `;
 
 const InputField = styled.div`
-  width: 97.5%;
+  width: 100%;
   height: 40px;
   background-color: rgba(184, 232, 234, 0.5);
   display: flex;
@@ -68,6 +69,7 @@ const InputField = styled.div`
   padding: 0 10px;
   border-radius: 10px;
   margin-bottom: 10px;
+  box-sizing: border-box;
 
   label {
     font-size: 23px;
@@ -89,10 +91,13 @@ const InputField = styled.div`
 
 const TwoColumnContainer = styled.div`
   display: flex;
-  height: 40px;
   justify-content: space-between;
   gap: 10px;
   margin-bottom: 10px;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+  }
 `;
 
 const ColumnBox = styled.div`
@@ -102,6 +107,8 @@ const ColumnBox = styled.div`
   background-color: rgba(184, 232, 234, 0.5);
   border-radius: 10px;
   padding: 0 10px;
+  min-height: 40px;
+  min-width: 0;
 
   label {
     font-size: 23px;
@@ -122,7 +129,7 @@ const ColumnBox = styled.div`
 `;
 
 const LargeInput = styled.textarea`
-  width: 97.5%;
+  width: 100%;
   height: 450px;
   border: 0.5px solid rgba(94, 120, 100, 1);
   border-radius: 10px;
@@ -131,6 +138,7 @@ const LargeInput = styled.textarea`
   margin-bottom: 20px;
   padding: 10px;
   font-family: Content;
+  box-sizing: border-box;
 `;
 
 const ButtonContainer = styled.div`
@@ -148,6 +156,16 @@ const Button = styled.button`
   border-radius: 10px;
   cursor: pointer;
   font-family: Title;
+`;
+
+const SecondaryButton = styled(Button)`
+  background-color: white;
+  color: black;
+  border: 0.5px solid rgba(94, 120, 100, 1);
+`;
+
+const HiddenFileInput = styled.input`
+  display: none;
 `;
 
 const FileName = styled.span`
@@ -207,7 +225,13 @@ const WriteDiaryForm = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setIsLoading(true); // 저장 시작 시 로딩 상태 true 설정
-        const token = Cookies.get('token');
+        const token = getToken();
+        if (!token) {
+            alert('로그인이 필요합니다.');
+            navigate('/signin');
+            setIsLoading(false);
+            return;
+        }
 
         const formData = new FormData();
         formData.append('diary', new Blob([JSON.stringify({
@@ -234,6 +258,11 @@ const WriteDiaryForm = () => {
             navigate('/calendar'); // 성공 시 캘린더 페이지로 리다이렉트
         } catch (error) {
             console.error(error);
+            if (error.response && (error.response.status === 401 || error.response.status === 403)) {
+                clearToken();
+                alert('로그인이 만료되었습니다. 다시 로그인해 주세요.');
+                navigate('/signin');
+            }
         } finally {
             setIsLoading(false); // 저장 완료 후 로딩 상태 false 설정
         }
@@ -253,14 +282,14 @@ const WriteDiaryForm = () => {
                         <LeftContainer>
                             <SwitchContainer>
                                 <ToggleSwitch onClick={handleToggle}>
-                                    <ToggleOption active={isToggled}>공개</ToggleOption>
-                                    <ToggleOption active={!isToggled}>비공개</ToggleOption>
+                                    <ToggleOption $active={isToggled}>공개</ToggleOption>
+                                    <ToggleOption $active={!isToggled}>비공개</ToggleOption>
                                 </ToggleSwitch>
                             </SwitchContainer>
                         </LeftContainer>
                         <RightContainer>
-                            <Button style={{ backgroundColor: "white", color: "black", border: "0.5px solid rgba(94, 120, 100, 1)" }}>저장</Button>
-                            <Button onClick={handleSubmit} primary>발행</Button>
+                            <SecondaryButton>저장</SecondaryButton>
+                            <Button onClick={handleSubmit}>발행</Button>
                         </RightContainer>
                     </TopContainer>
                     <InputField>
@@ -279,7 +308,7 @@ const WriteDiaryForm = () => {
                     </TwoColumnContainer>
                     <LargeInput value={content} onChange={(e) => setContent(e.target.value)} placeholder="본문" />
                     <ButtonContainer>
-                        <input type="file" id="inputTag" style={{ display: 'none' }} onChange={handleImageChange} />
+                        <HiddenFileInput type="file" id="inputTag" onChange={handleImageChange} />
                         <Button onClick={handleButtonClick}>사진 첨부하기</Button>
                         {fileName && <FileName>{fileName}</FileName>} {/* 파일명이 있을 때만 표시 */}
                     </ButtonContainer>

@@ -2,6 +2,11 @@ import React, { useState } from 'react';
 import styled from 'styled-components';
 import axios from 'axios';
 import Cookies from "js-cookie";
+import {
+    DEFAULT_SHARED_DIARY_COVER,
+    getSharedDiaryCoverSrc,
+    sharedDiaryCoverOptions
+} from '../../imageAssets';
 
 const ModalBackground = styled.div`
   z-index: 1;
@@ -13,31 +18,36 @@ const ModalBackground = styled.div`
   background-color: rgba(0, 0, 0, 0.5);
   display: flex;
   justify-content: center;
+  align-items: center;
 `;
 
 const ModalContent = styled.div`
-  margin-top: 50px;
   background-color: white;
-  padding: 20px;
-  border-radius: 10px;
-  width: 400px;
-  height: 620px;
+  padding: 24px;
+  border-radius: 8px;
+  width: min(420px, calc(100vw - 32px));
+  box-sizing: border-box;
+  position: relative;
 `;
 
 const TitleContainer = styled.div`
-  border-radius: 10px;
+  border-radius: 8px;
   height: 40px;
   background-color: rgba(184, 232, 234, 0.5);
+  display: flex;
+  align-items: center;
+  padding: 0 14px;
+  box-sizing: border-box;
 `;
 
 const TitleInputBox = styled.input`
-  margin-left: 20px;
+  margin-left: 16px;
   background-color: transparent;
-  line-height: 36px;
   border: none;
-  width: 70%;
+  width: 100%;
   font-size: 18px;
   font-family: Content;
+  outline: none;
 `;
 
 const CreateDiaryButton = styled.div`
@@ -45,7 +55,7 @@ const CreateDiaryButton = styled.div`
   text-align: center;
   font-family: Content;
   border: none;
-  border-radius: 10px;
+  border-radius: 8px;
   height: 50px;
   color: white;
   line-height: 50px;
@@ -54,46 +64,78 @@ const CreateDiaryButton = styled.div`
 `;
 
 const TitleImageBox = styled.div`
-  margin-left: 15px;
-  display: inline-block;
+  display: block;
   border-radius: 5px;
   width: 50px;
   height: 50px;
-  background-image: ${props => props.backgroundImage ? `url(${props.backgroundImage})` : 'none'};
+  background-image: ${props => props.$backgroundImage ? `url(${props.$backgroundImage})` : 'none'};
   background-size: cover;
   background-position: center;
-  margin-bottom: 10px;
   cursor: pointer;
+  border: 3px solid ${props => props.$selected ? 'rgba(94, 120, 100, 1)' : 'transparent'};
+  box-sizing: border-box;
 `;
 
 const TitleExampleBox = styled.div`
-  margin: 20px 0px 20px 45px;
-  height: 300px;
-  width: 300px;
-  background-image: ${props => props.backgroundImage ? `url(${props.backgroundImage})` : 'none'};
+  margin: 20px auto;
+  aspect-ratio: 1 / 1;
+  width: min(300px, 100%);
+  background-image: ${props => props.$backgroundImage ? `linear-gradient(180deg, rgba(255,255,255,0.86), rgba(255,255,255,0.18) 48%, rgba(0,0,0,0.28)), url(${props.$backgroundImage})` : 'none'};
   background-size: cover;
   background-position: center;
-  padding-top: 10px;
+  padding: 18px;
+  box-sizing: border-box;
   color: black;
-  text-align: center;
-  border-radius: 10px;
+  text-align: left;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
   h1{
     font-size: 20px;
+    margin: 0;
+    word-break: keep-all;
   }
   h2{
     font-size: 15px;
-    margin-left: 180px;
+    margin: 8px 0 0;
     font-weight: lighter;
   }
   h3{
-    margin-left: 170px;
-    margin-top: 200px;
+    margin: 0;
     font-size: 13px;
+    text-align: right;
   }
 `;
 
-const CreateSharedDiaryModal = ({ isOpen, onClose }) => {
-    const [selectedCover, setSelectedCover] = useState(null);
+const CoverOptionList = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin: 12px 0 18px;
+`;
+
+const CloseButton = styled.button`
+  width: 24px;
+  height: 24px;
+  background-color: transparent;
+  border: 2px solid rgba(94, 120, 100, 1);
+  border-radius: 50%;
+  font-weight: bold;
+  color: rgba(94, 120, 100, 1);
+  cursor: pointer;
+  position: absolute;
+  top: 16px;
+  right: 16px;
+`;
+
+const ModalTitle = styled.h2`
+  text-align: center;
+  margin: 0 0 22px;
+`;
+
+const CreateSharedDiaryModal = ({ isOpen, onClose, onCreated }) => {
+    const [selectedCover, setSelectedCover] = useState(DEFAULT_SHARED_DIARY_COVER);
     const [title, setTitle] = useState('');
     const today = new Date().toLocaleDateString();
 
@@ -106,7 +148,7 @@ const CreateSharedDiaryModal = ({ isOpen, onClose }) => {
     const handleSave = async () => {
         const diaryData = {
             title,
-            coverImageUrl: selectedCover,
+            coverImageUrl: selectedCover || DEFAULT_SHARED_DIARY_COVER,
             date: today
         };
         const token = Cookies.get('token');
@@ -118,8 +160,10 @@ const CreateSharedDiaryModal = ({ isOpen, onClose }) => {
                 }
             });
             alert("Diary created successfully!");
+            if (onCreated) {
+                onCreated();
+            }
             onClose();
-            window.location.reload();
         } catch (error) {
             console.error("Error creating diary", error);
             alert("Failed to create diary.");
@@ -129,21 +173,10 @@ const CreateSharedDiaryModal = ({ isOpen, onClose }) => {
     return (
         <ModalBackground onClick={onClose}>
             <ModalContent onClick={(e) => e.stopPropagation()}>
-                <button style={{
-                    width: "20px",
-                    height: "20px",
-                    backgroundColor: "transparent",
-                    border: "2px solid rgba(94, 120, 100, 1)",
-                    float: "right",
-                    borderRadius: "50%",
-                    fontWeight: "bold",
-                    paddingLeft: "4px",
-                    color: "rgba(94, 120, 100, 1)",
-                    cursor: "pointer"
-                }} onClick={onClose}>X</button>
-                <h2 style={{ textAlign: "center" }}>새로운 교환일기 만들기</h2>
+                <CloseButton onClick={onClose}>X</CloseButton>
+                <ModalTitle>새로운 교환일기 만들기</ModalTitle>
                 <TitleContainer>
-                    <div style={{ float: "left", lineHeight: "38px", marginLeft: "10px" }}>
+                    <div>
                         <label>제목</label>
                     </div>
                     <TitleInputBox
@@ -152,31 +185,25 @@ const CreateSharedDiaryModal = ({ isOpen, onClose }) => {
                         onChange={(e) => setTitle(e.target.value)}
                     />
                 </TitleContainer>
-                <TitleExampleBox backgroundImage={selectedCover ? require(`./image/${selectedCover}.png`) : null}>
+                <TitleExampleBox $backgroundImage={getSharedDiaryCoverSrc(selectedCover)}>
                     <h1>{title || "제목"}</h1>
                     <h2>{today}</h2>
                     <h3>참여자1, 참여자2, ...</h3>
                 </TitleExampleBox>
                 <div>
-                    <div style={{ marginBottom: "15px" }}>
-                        <label style={{ marginLeft: "15px" }}>표지 선택하기</label>
+                    <div>
+                        <label>표지 선택하기</label>
                     </div>
-                    <TitleImageBox
-                        backgroundImage={require('./image/coverImage2.png')}
-                        onClick={() => handleCoverSelect('coverImage2')}
-                    />
-                    <TitleImageBox
-                        backgroundImage={require('./image/coverImage3.png')}
-                        onClick={() => handleCoverSelect('coverImage3')}
-                    />
-                    <TitleImageBox
-                        backgroundImage={require('./image/coverImage4.png')}
-                        onClick={() => handleCoverSelect('coverImage4')}
-                    />
-                    <TitleImageBox
-                        backgroundImage={require('./image/coverImage5.png')}
-                        onClick={() => handleCoverSelect('coverImage5')}
-                    />
+                    <CoverOptionList>
+                    {sharedDiaryCoverOptions.map((cover) => (
+                        <TitleImageBox
+                            key={cover.key}
+                            $backgroundImage={cover.image}
+                            $selected={selectedCover === cover.key}
+                            onClick={() => handleCoverSelect(cover.key)}
+                        />
+                    ))}
+                    </CoverOptionList>
                 </div>
                 <CreateDiaryButton onClick={handleSave}>생성하기</CreateDiaryButton>
             </ModalContent>

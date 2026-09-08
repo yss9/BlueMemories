@@ -2,6 +2,8 @@ package com.backend.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -12,6 +14,8 @@ import java.util.List;
 
 @Service
 public class YouTubeService {
+
+    private static final Logger log = LoggerFactory.getLogger(YouTubeService.class);
 
     @Value("${youtube_api.key}")
     private String apiKey;
@@ -39,7 +43,11 @@ public class YouTubeService {
                         .queryParam("key", apiKey)
                         .build())
                 .retrieve()
-                .bodyToMono(String.class);
+                .bodyToMono(String.class)
+                .onErrorResume(error -> {
+                    log.warn("YouTube search failed for query '{}': {}", query, error.getMessage());
+                    return Mono.just("");
+                });
     }
 
     private String extractVideoId(String response) {

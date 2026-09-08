@@ -107,6 +107,7 @@ gradle-app.setting
 # Cache of project
 .gradletasknamecache
 application.properties
+!src/test/resources/application-test.properties
 # Eclipse Gradle plugin generated files
 # Eclipse Core
 # JDT-specific (Eclipse Java Development Tools)

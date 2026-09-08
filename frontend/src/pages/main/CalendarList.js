@@ -9,11 +9,14 @@ import happyImage from '../sharedDiary/image/happy.png';
 import sadImage from '../sharedDiary/image/sad.png';
 import neutralImage from '../sharedDiary/image/neutral.png';
 import calendarImage from '../images/calendar.png';
+import { getDiaryImageSrc } from '../../imageAssets';
+import PageContainer from '../../components/layout/PageContainer';
 
-const Container = styled.div`
-  padding-top: 40px;
-  margin: 0 auto;
-  width: 1050px;
+const Container = styled(PageContainer).attrs({
+  $maxWidth: '1050px',
+  $padding: '40px 24px 24px',
+  $fontFamily: 'Content',
+})`
   font-family: Content;
 `;
 
@@ -53,14 +56,25 @@ const ListItem = styled.div`
   cursor: pointer;
   display: flex;
   padding: 20px 20px;
+  gap: 24px;
+
   &:hover {
     background-color: #f9f9f9;
   }
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+  }
+`;
+
+const MonthButton = styled(Button)`
+  color: black;
+  background-color: white;
 `;
 
 const ListItemText = styled.div`
-  width: 70%;
-  margin-right: 10%;
+  flex: 1;
+  min-width: 0;
   height: 100%;
 `;
 
@@ -91,8 +105,9 @@ const SentimentBox = styled.div`
   display: inline-block;
   font-family: Content;
   border-radius: 10px;
-  left: 300px;
-  top: 50px;
+  left: 0;
+  top: 0;
+  margin-bottom: 16px;
   img {
     padding-right: 20px;
     width: 25px;
@@ -108,7 +123,7 @@ const CalendarButton = styled.button`
   border: none;
   background-color: transparent;
   position: relative;
-  left: 198px;
+  left: 12px;
   top:18px;
   cursor: pointer;
 `;
@@ -116,10 +131,25 @@ const CalendarButton = styled.button`
 const SearchContainer = styled.div`
   text-align: center;
   margin-bottom: 20px;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 10px;
+`;
+
+const DiaryImageBox = styled.div`
+  width: 200px;
+  height: 200px;
+  flex: 0 0 200px;
+`;
+
+const DiaryImage = styled.img`
+  max-width: 200px;
+  max-height: 200px;
 `;
 
 const SearchInput = styled.input`
-  width: 300px;
+  width: min(300px, 100%);
   height: 30px;
   padding: 5px;
   border-radius: 5px;
@@ -137,7 +167,6 @@ const SearchButton = styled.button`
   padding: 5px 15px;
   border-radius: 5px;
   cursor: pointer;
-  margin-left: 10px;
 `;
 
 const SearchSelect = styled.select`
@@ -265,7 +294,7 @@ const CalendarListPage = () => {
             <Nav/>
             <Container>
                 <HeaderContainer>
-                    <Button style={{color: "black", backgroundColor: "white"}} onClick={handlePrevMonth}>&lt;</Button>
+                    <MonthButton onClick={handlePrevMonth}>&lt;</MonthButton>
                     <Select value={getYear(currentDate)} onChange={handleYearChange}>
                         {Array.from({length: 100}, (_, i) => getYear(new Date()) - 40 + i).map(year => (
                             <option key={year} value={year}>{year}</option>
@@ -276,7 +305,7 @@ const CalendarListPage = () => {
                             <option key={month} value={month}>{month + 1}</option>
                         ))}
                     </Select>
-                    <Button style={{color: "black", backgroundColor: "white"}} onClick={handleNextMonth}>&gt;</Button>
+                    <MonthButton onClick={handleNextMonth}>&gt;</MonthButton>
                     <CalendarButton onClick={handleCalendar}></CalendarButton>
                 </HeaderContainer>
 
@@ -302,17 +331,16 @@ const CalendarListPage = () => {
                                     <SentimentBox>
                                         <img
                                             src={getImageForSentiment(entry.confidencePositive, entry.confidenceNeutral, entry.confidenceNegative)}
-                                            alt="sentiment image"/>
+                                            alt="감정"/>
                                         {resultSentiment(entry.sentiment, entry.confidencePositive, entry.confidenceNeutral, entry.confidenceNegative)}
                                     </SentimentBox>
                                     <ListItemTitle>{entry.title}</ListItemTitle>
                                     <ListItemDate>{format(new Date(entry.date), 'yyyy-MM-dd')}</ListItemDate>
                                     <ListItemSummary>{entry.content.substring(0, 150)}...</ListItemSummary>
                                 </ListItemText>
-                                <div style={{width: "200px", height: "200px"}}>
-                                    <img src={entry.imageUrl} style={{maxWidth: "200px", maxHeight: "200px"}}
-                                         alt="diary"/>
-                                </div>
+                                <DiaryImageBox>
+                                    <DiaryImage src={getDiaryImageSrc(entry.imageUrl)} alt="일기 첨부 이미지"/>
+                                </DiaryImageBox>
                             </ListItem>
                         ))
                     ) : (

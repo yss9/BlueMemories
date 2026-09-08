@@ -166,7 +166,7 @@ public class SharedDiaryContentService {
         dto.setKeyword2(content.getKeyword2());
         dto.setKeyword3(content.getKeyword3());
         dto.setKeyword4(content.getKeyword4());
-        dto.setImageUrl(content.getImageUrl());
+        dto.setImageUrl(s3Service.createPresignedGetUrl(content.getImageUrl()));
         dto.setSharedDiaryId(content.getSharedDiary().getId());
         return dto;
     }

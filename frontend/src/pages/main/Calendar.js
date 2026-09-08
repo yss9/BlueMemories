@@ -9,6 +9,7 @@ import happyImage from '../images/happy.png';
 import sadImage from '../images/sad.png';
 import neutralImage from '../images/neutral.png';
 import normalImage from '../images/default.png';
+import PageContainer from '../../components/layout/PageContainer';
 
 const moodImages = {
     positive: happyImage,
@@ -17,16 +18,23 @@ const moodImages = {
     normal: normalImage
 };
 
-const Container = styled.div`
-  padding-top: 40px;
+const Container = styled(PageContainer).attrs({
+  $maxWidth: '650px',
+  $margin: '20px auto',
+  $padding: '40px 24px 24px',
+  $fontFamily: 'Content',
+  $textAlign: 'center',
+})`
   text-align: center;
-  margin: 20px auto;
-  width: 650px;
   font-family: Content;
 `;
 
 const HeaderContainer = styled.div`
   display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
   padding: 10px 20px;
 `;
 
@@ -41,11 +49,23 @@ const Button = styled.button`
 `;
 
 const YearMonthDisplay = styled.div`
-  margin-left: 220px;
   display: flex;
   align-items: center;
+  justify-content: center;
   font-family: 'Title';
   font-size: 24px;
+  cursor: pointer;
+  flex: 1;
+`;
+
+const MonthButton = styled(Button)`
+  color: black;
+  background-color: white;
+`;
+
+const ListViewButton = styled.button`
+  background-color: transparent;
+  border: 0;
   cursor: pointer;
 `;
 
@@ -70,11 +90,11 @@ const DayTile = styled.div`
   width: 100%;
   padding-top: 100%; /* Aspect ratio 1:1 */
   position: relative;
-  background-image: ${props => `url(${props.moodImage || moodImages.normal})`};
+  background-image: ${props => `url(${props.$moodImage || moodImages.normal})`};
   background-size: cover;
   background-position: center;
   border-radius: 25px;
-  color: ${props => (props.isWeekend ? (props.isSunday ? 'rgba(159, 0, 0, 1)' : 'rgba(4, 0, 179, 1)') : 'rgba(0, 0, 0, 1)')};
+  color: ${props => (props.$isWeekend ? (props.$isSunday ? 'rgba(159, 0, 0, 1)' : 'rgba(4, 0, 179, 1)') : 'rgba(0, 0, 0, 1)')};
   font-size: 25px;
   text-align: center;
   cursor: pointer;
@@ -104,7 +124,7 @@ const WeekdayTile = styled.div`
   justify-content: center;
   align-items: center;
   height: 30px;
-  color: ${props => (props.isWeekend ? (props.isSunday ? 'rgba(159, 0, 0, 1)' : 'rgba(4, 0, 179, 1)') : 'rgba(0, 0, 0, 1)')};
+  color: ${props => (props.$isWeekend ? (props.$isSunday ? 'rgba(159, 0, 0, 1)' : 'rgba(4, 0, 179, 1)') : 'rgba(0, 0, 0, 1)')};
 `;
 
 const weekdays = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
@@ -173,7 +193,7 @@ const Calendar = () => {
 
     const renderWeekdays = () => {
         return weekdays.map((day, index) => (
-            <WeekdayTile key={index} isWeekend={index === 0 || index === 6} isSunday={index === 0}>
+            <WeekdayTile key={index} $isWeekend={index === 0 || index === 6} $isSunday={index === 0}>
                 {day}
             </WeekdayTile>
         ));
@@ -199,9 +219,9 @@ const Calendar = () => {
                 days.push(
                     <DayTile
                         key={formattedDay}
-                        isWeekend={isSunday || isSaturday}
-                        isSunday={isSunday}
-                        moodImage={moodImage}
+                        $isWeekend={isSunday || isSaturday}
+                        $isSunday={isSunday}
+                        $moodImage={moodImage}
                         onClick={() => handleDayClick(new Date(formattedDay))}
                     >
                         <DayContent>{day.getDate()}</DayContent>
@@ -221,9 +241,8 @@ const Calendar = () => {
             <Nav />
             <Container>
                 <HeaderContainer>
-                    {/*<Button style={{ padding: "5px 30px", fontSize: "18px" }} >일기 쓰기</Button>*/}
                     <YearMonthDisplay>
-                        <Button style={{ color: "black", backgroundColor: "white" }} onClick={handlePrevMonth}>&lt;</Button>
+                        <MonthButton onClick={handlePrevMonth}>&lt;</MonthButton>
                         <Select value={getYear(currentDate)} onChange={handleYearChange}>
                             {Array.from({ length: 100 }, (_, i) => getYear(new Date()) - 40 + i).map(year => (
                                 <option key={year} value={year}>{year}</option>
@@ -234,11 +253,11 @@ const Calendar = () => {
                                 <option key={month} value={month}>{month + 1}</option>
                             ))}
                         </Select>
-                        <Button style={{ color: "black", backgroundColor: "white" }} onClick={handleNextMonth}>&gt;</Button>
+                        <MonthButton onClick={handleNextMonth}>&gt;</MonthButton>
                     </YearMonthDisplay>
-                    <button style={{ backgroundColor: "transparent", border: "0", cursor: "pointer", marginLeft:"180px" }}>
-                        <img src={`${process.env.PUBLIC_URL}/image/posting_list.png`} alt="icon" width="25" height="25" onClick={handleListView} />
-                    </button>
+                    <ListViewButton onClick={handleListView}>
+                        <img src={`${process.env.PUBLIC_URL}/image/posting_list.png`} alt="" width="25" height="25" />
+                    </ListViewButton>
                 </HeaderContainer>
                 <WeekdaysContainer>{renderWeekdays()}</WeekdaysContainer>
                 <DaysContainer>{renderDays()}</DaysContainer>

@@ -1,15 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import Cookies from 'js-cookie';
 import Nav from "../nav/Nav";
 import styled from "styled-components";
+import { getToken } from '../../authToken';
+import { getDiaryImageSrc } from '../../imageAssets';
+import PageContainer from '../../components/layout/PageContainer';
 
-const Container = styled.div`
-  margin: 0 auto;
-  padding: 20px;
-  width: 1100px;
-`;
+const Container = styled(PageContainer).attrs({
+  $maxWidth: '1100px',
+  $padding: '20px',
+})``;
 
 const IntroduceContainer = styled.div`
   text-align: center;
@@ -30,11 +31,17 @@ const IntroduceContainer = styled.div`
 const MasonryContainer = styled.div`
   display: flex;
   justify-content: space-between;
+  gap: 20px;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+  }
 `;
 
 const Column = styled.div`
   flex: 1;
-  margin: 0 10px;
+  min-width: 0;
+  margin: 0;
 
   &:first-child {
     margin-left: 0;
@@ -105,7 +112,7 @@ const PageButton = styled.button`
     cursor: not-allowed;
   }
 
-  font-weight: ${props => props.isActive ? 'bold' : 'normal'};
+  font-weight: ${props => props.$isActive ? 'bold' : 'normal'};
 `;
 
 const ArrowButton = styled.button`
@@ -134,19 +141,32 @@ const CommunityForm = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
     const diariesPerPage = 30; // 페이지당 보여줄 일기 개수
     const navigate = useNavigate();
 
     useEffect(() => {
-        const token = Cookies.get('token');
+        const token = getToken();
         if (token) {
+            setLoading(true);
+            setError(null);
             axios.get('/api/diaries/users', {
+                params: {
+                    page: currentPage - 1,
+                    size: diariesPerPage
+                },
                 headers: {
                     Authorization: `Bearer ${token}`
                 }
             })
                 .then(response => {
-                    setDiaries(response.data);
+                    const responseData = response.data;
+                    const pageDiaries = Array.isArray(responseData)
+                        ? responseData
+                        : responseData.content || [];
+
+                    setDiaries(pageDiaries);
+                    setTotalPages(Math.max(responseData.page ? responseData.page.totalPages : 1, 1));
                     setLoading(false);
                 })
                 .catch(error => {
@@ -154,11 +174,14 @@ const CommunityForm = () => {
                     setError(error);
                     setLoading(false);
                 });
+        } else {
+            setDiaries([]);
+            setTotalPages(1);
         }
-    }, []);
+    }, [currentPage, diariesPerPage]);
 
     const handleTitleClick = (diary) => {
-        navigate(`/community-diary`, { state: { id: diary.id } });
+        navigate(`/community-diary/${diary.id}`, { state: { id: diary.id } });
     };
 
     const handlePageChange = (pageNumber) => {
@@ -168,11 +191,7 @@ const CommunityForm = () => {
     if (loading) return <div>Loading...</div>;
     if (error) return <div>Error loading diaries.</div>;
 
-    const indexOfLastDiary = currentPage * diariesPerPage;
-    const indexOfFirstDiary = indexOfLastDiary - diariesPerPage;
-    const currentDiaries = diaries.slice(indexOfFirstDiary, indexOfLastDiary);
-
-    const totalPages = Math.ceil(diaries.length / diariesPerPage);
+    const currentDiaries = diaries;
 
     // 3개의 컬럼에 아이템을 분배하는 함수
     const columns = [[], [], []];
@@ -196,7 +215,7 @@ const CommunityForm = () => {
                 <PageButton
                     key={i}
                     onClick={() => handlePageChange(i)}
-                    isActive={i === currentPage}
+                    $isActive={i === currentPage}
                 >
                     {i}
                 </PageButton>
@@ -221,7 +240,7 @@ const CommunityForm = () => {
                             {column.map((diary, index) => (
                                 <div key={index}>
                                     <CardWrapper onClick={() => handleTitleClick(diary)}>
-                                        {diary.imageUrl && <img src={diary.imageUrl} alt={diary.title} />}
+                                        <img src={getDiaryImageSrc(diary.thumbnailUrl)} alt={diary.title} />
                                         <Title>{diary.title}</Title>
                                         <Author>작성자: {diary.nickname}</Author>
                                     </CardWrapper>

@@ -11,10 +11,8 @@ import SharedDiaryPage from "./pages/sharedDiary/SharedDiary";
 import CommunityDiaryPage from "./pages/community/CommunityDiary";
 import ApplicationList from "./pages/sharedDiary/Application";
 import LoadingAnimation from "./pages/diary/LoadingAnimation";
-import SharedDiaryContent from "./pages/sharedDiary/SharedDiaryContent";
 import SharedDiaryContentPage from "./pages/sharedDiary/SharedDiaryContent";
 import WriteSharedDiaryForm from "./pages/sharedDiary/WriteSharedDiary";
-import LoadSharedDiaryContent from "./pages/sharedDiary/LoadSharedDiaryContent";
 import LoadSharedDiaryPage from "./pages/sharedDiary/LoadSharedDiaryContent";
 import CalendarListPage from "./pages/main/CalendarList";
 import MyPage from "./pages/main/MyPage";
@@ -34,6 +32,7 @@ function App() {
             <Route path="/community" element={<CommunityForm/>}/>
             <Route path="/shared-diary" element={<SharedDiaryPage/>}/>
             <Route path="/community-diary" element={<CommunityDiaryPage/>}/>
+            <Route path="/community-diary/:id" element={<CommunityDiaryPage/>}/>
             <Route path="/applications" element={<ApplicationList/>}/>
             <Route path="/loading" element={<LoadingAnimation/>}/>
             <Route path="/shared-diary-list" element={<SharedDiaryContentPage/>}/>

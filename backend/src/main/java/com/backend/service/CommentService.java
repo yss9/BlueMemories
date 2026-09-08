@@ -11,9 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Service
 public class CommentService {
@@ -28,8 +26,10 @@ public class CommentService {
     private UserRepository userRepository;
 
     public List<CreateCommentRequest> getDiaryComments(Long diaryId) {
-        Optional<Diary> diary = diaryRepository.findById(diaryId);
-        return commentRepository.findCommentsByDiary(diary.get()).stream()
+        Diary diary = diaryRepository.findById(diaryId)
+                .orElseThrow(() -> new IllegalArgumentException("Diary not found: " + diaryId));
+
+        return commentRepository.findCommentsByDiary(diary).stream()
                 .map(comment -> new CreateCommentRequest(
                         comment.getDiary().getId(),
                         comment.getContent(),
@@ -37,14 +37,25 @@ public class CommentService {
                 .collect(Collectors.toList());
     }
 
-    public Comment createDiaryComment(Long diaryId, String userId, String content){
-        Optional<Diary> diary = diaryRepository.findById(diaryId);
+    public CreateCommentRequest createDiaryComment(Long diaryId, String userId, String content){
+        Diary diary = diaryRepository.findById(diaryId)
+                .orElseThrow(() -> new IllegalArgumentException("Diary not found: " + diaryId));
         User user = userRepository.findByUserId(userId);
+        if (user == null) {
+            throw new IllegalArgumentException("User not found: " + userId);
+        }
+
         Comment comment = new Comment();
-        comment.setDiary(diary.get());
+        comment.setDiary(diary);
         comment.setUser(user);
         comment.setContent(content);
-        return commentRepository.save(comment);
+        Comment savedComment = commentRepository.save(comment);
+
+        return new CreateCommentRequest(
+                savedComment.getDiary().getId(),
+                savedComment.getContent(),
+                savedComment.getUser().getNickname()
+        );
     }
 
 }

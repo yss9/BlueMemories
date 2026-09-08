@@ -28,12 +28,6 @@ const Container = styled.div`
     scrollbar-width: none;
 `;
 
-const WelcomeMessage = styled.div`
-  font-size: 24px;
-  font-family: Content;
-  scroll-snap-align: center;
-`;
-
 const ContainerTop = styled.div`
   background-image: url("${topMain}");
     background-size:cover;
@@ -120,17 +114,19 @@ const Button = styled.div`
   border: none;
   border-radius: 15px;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   transition: background-color 0.3s, transform 0.3s;
   &:hover {
     background-color: rgba(179, 246, 202, 0.5);
   }
   p{
-    display: inline-block;
-    margin-top: 55px;
+    margin: 0;
     padding-left: 40px;
   }
   ${(props) =>
-          props.active &&
+          props.$active &&
           css`
             background-color: rgba(179, 246, 202, 0.5);
             transform: translateX(10px);
@@ -151,10 +147,10 @@ const ContentContainer = styled.div`
   margin-top: 30px;
   height: 90%;
   background-color: #f0f0f0;
-  background-image: ${({ backgroundImage }) => `url(${backgroundImage})`};
+  background-image: ${({ $backgroundImage }) => `url(${$backgroundImage})`};
   background-size: cover;
   position: relative;
-  display: ${({ active }) => (active ? 'block' : 'none')};
+  display: ${({ $active }) => ($active ? 'block' : 'none')};
   animation: ${slideIn} 0.5s ease forwards;
   border-radius: 35px;
 `;
@@ -197,12 +193,6 @@ const SentimentTextBox = styled.div`
   font-family: Title;
 `;
 
-const BottomTopContent = styled.div`
-  font-family: Content;
-  font-size: 28px;
-  color: #333;
-  text-align: center;
-`;
 const Title = styled.p`
   font-family: 'Title';
   font-size: 35px;
@@ -233,7 +223,7 @@ const CategoryButton = styled.button`
     background-color: #d4f4fa;
   }
 
-  ${(props) => props.active && `
+  ${(props) => props.$active && `
     background-color: #b3f6ca;
     border-color: #8ce5a6;
   `}
@@ -274,6 +264,17 @@ const Card = styled.div`
   margin: 0 10px;
 `;
 
+const ButtonIcon = styled.img`
+  flex: 0 0 auto;
+`;
+
+const TopicText = styled.div`
+  background-color: white;
+  color: black;
+  padding: 5px 30px;
+  border-radius: 10px;
+`;
+
 const categories = [
     { name: '감사', topics: ['오늘 가장 감사했던 일은 무엇인가요?', '지난주에 감사했던 순간은 언제였나요?', '감사한 사람 또는 상황에 대해 적어보세요.'] },
     { name: '감정', topics: ['오늘 느낀 주요 감정은 무엇이었나요? 왜 그런 감정을 느꼈나요?', '최근에 가장 기뻤던 순간은 언제였나요?', '슬픔이나 좌절감을 느꼈을 때 어떻게 대처했나요?'] },
@@ -288,8 +289,8 @@ const categories = [
 ];
 
 const MainPage = () => {
-    const [nickname, setNickname] = useState('');
-    const [loading, setLoading] = useState(false);
+    const [, setNickname] = useState('');
+    const [, setLoading] = useState(false);
     const [error, setError] = useState(true);
     const [activeContent, setActiveContent] = useState(null);
     const diaryInfoText = "작성된 일기를 분석해서\n긍정, 중립, 부정 수치를 나타내줘요.";
@@ -371,50 +372,50 @@ const MainPage = () => {
                 </ContainerTop>
                 <ContainerMiddleTop>
                     <ButtonContainer>
-                        <Button active={activeContent === 1} onClick={() => handleButtonClick(1)}>
+                        <Button $active={activeContent === 1} onClick={() => handleButtonClick(1)}>
                             <p>나만의 일기장</p>
-                            <img style={{float:"right"}} src={diaryIcon} alt="나만의 일기장"/>
+                            <ButtonIcon src={diaryIcon} alt="나만의 일기장"/>
                         </Button>
-                        <Button active={activeContent === 2} onClick={() => handleButtonClick(2)}>
+                        <Button $active={activeContent === 2} onClick={() => handleButtonClick(2)}>
                             <p>공유 일기장</p>
-                            <img style={{float:"right"}} src={sharedDiaryIcon} alt="공유 일기장"/>
+                            <ButtonIcon src={sharedDiaryIcon} alt="공유 일기장"/>
                         </Button>
-                        <Button active={activeContent === 3} onClick={() => handleButtonClick(3)}>
+                        <Button $active={activeContent === 3} onClick={() => handleButtonClick(3)}>
                             <p>커뮤니티</p>
-                            <img style={{float:"right"}} src={communityIcon} alt="커뮤니티"/>
+                            <ButtonIcon src={communityIcon} alt="커뮤니티"/>
                         </Button>
-                        <Button active={activeContent === 4} onClick={() => handleButtonClick(4)}>
+                        <Button $active={activeContent === 4} onClick={() => handleButtonClick(4)}>
                             <p>오늘의 추천</p>
-                            <img style={{float:"right"}} src={todayRecommendIcon} alt="오늘의 추천"/>
+                            <ButtonIcon src={todayRecommendIcon} alt="오늘의 추천"/>
                         </Button>
                     </ButtonContainer>
                     <ContentContainer
-                        active={activeContent === 1}
-                        backgroundImage={diary}
+                        $active={activeContent === 1}
+                        $backgroundImage={diary}
                     >
                         <Content>
                             {diaryInfoText}
                         </Content>
                     </ContentContainer>
                     <ContentContainer
-                        active={activeContent === 2}
-                        backgroundImage={sharedDiary}
+                        $active={activeContent === 2}
+                        $backgroundImage={sharedDiary}
                     >
                         <Content>
                             {sharedDiaryInfoText}
                         </Content>
                     </ContentContainer>
                     <ContentContainer
-                        active={activeContent === 3}
-                        backgroundImage={community}
+                        $active={activeContent === 3}
+                        $backgroundImage={community}
                     >
                         <Content>
                             {communityInfoText}
                         </Content>
                     </ContentContainer>
                     <ContentContainer
-                        active={activeContent === 4}
-                        backgroundImage={todayRecommend}
+                        $active={activeContent === 4}
+                        $backgroundImage={todayRecommend}
                     >
                         <Content>
                             {todayRecommendInfoText}
@@ -424,15 +425,15 @@ const MainPage = () => {
                 <ContainerMiddleBottom>
                     <SentimentBox>
                         <div>
-                            <img src={`${happy}`}/>
+                            <img src={`${happy}`} alt="" />
                             <p>긍정</p>
                         </div>
                         <div>
-                            <img src={`${neutral}`}/>
+                            <img src={`${neutral}`} alt="" />
                             <p>중립</p>
                         </div>
                         <div>
-                            <img src={`${sad}`}/>
+                            <img src={`${sad}`} alt="" />
                             <p>부정</p>
                         </div>
                     </SentimentBox>
@@ -446,7 +447,7 @@ const MainPage = () => {
                         {categories.map((category, index) => (
                             <CategoryButton
                                 key={category.name}
-                                active={activeCategoryIndex === index}
+                                $active={activeCategoryIndex === index}
                                 onClick={() => handleCategoryClick(index)}
                             >
                                 {category.name}
@@ -458,7 +459,7 @@ const MainPage = () => {
                             <CardContainer key={category.name}>
                                 {category.topics.map((topic, idx) => (
                                     <Card key={idx}>
-                                        <div style={{backgroundColor:"white", color:"black", padding:"5px 30px", borderRadius:"10px"}}>{topic}</div>
+                                        <TopicText>{topic}</TopicText>
                                     </Card>
                                 ))}
                             </CardContainer>

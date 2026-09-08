@@ -5,67 +5,59 @@ import Cookies from 'js-cookie';
 import Nav from "../nav/Nav";
 import CreateSharedDiaryModal from "./CreateSharedDiaryModal";
 import {useNavigate} from "react-router-dom";
+import { getSharedDiaryCoverSrc } from '../../imageAssets';
+import PageContainer from '../../components/layout/PageContainer';
 
-const Container = styled.div`
-  padding-top: 40px;
-  margin: 20px auto;
-  width: 1200px;
-  height: 650px;
+const Container = styled(PageContainer).attrs({
+  $maxWidth: '1100px',
+  $margin: '20px auto',
+  $padding: '40px 24px 24px',
+})`
   font-family: Content;
 `;
 
 const LabelContainer = styled.div`
   width: 100%;
-  height: 70px;
-  margin-top: -10px;
-  margin-bottom: 10px;
+  margin-bottom: 24px;
   text-align: center;
   font-family: Title;
   font-size: 30px;
-  display: inline-block;
 `;
 
 const SearchContainer = styled.div`
   width: 100%;
-  height: 55px;
-  margin-top: -20px;
-  display: inline-block;
+  min-height: 55px;
 `;
 
 const ApplicationContainer = styled.div`
   width: 100%;
-  height: 60px;
-  margin-top: 45px;
+  min-height: 60px;
+  margin-top: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 `;
 
 const SharedDiaryListContainer = styled.div`
   width: 100%;
-  height: 370px;
-  padding-left: 15px;
-  overflow-x: scroll;  /* 가로 스크롤 허용 */
-  overflow-y: hidden;  /* 세로 스크롤 숨김 */
-  white-space: nowrap; /* 리스트를 가로로 일렬로 배치 */
+  margin-top: 12px;
+  padding: 8px 4px 20px;
+  display: flex;
+  gap: 20px;
+  overflow-x: auto;
+  overflow-y: hidden;
 
   &::-webkit-scrollbar {
-    display: none;  /* 스크롤바 숨김 */
+    display: none;
   }
-`;
-
-const SearchInput = styled.input`
-  border: 1px solid rgba(94, 120, 100, 1);
-  border-radius: 10px;
-  width: 450px;
-  height: 45px;
 `;
 
 const ApplicationListButton = styled.button`
   background-color: rgba(232, 232, 232, 1);
-  float: right;
-  margin-right: 130px;
   width: 120px;
   height: 45px;
   border: none;
-  border-radius: 10px;
+  border-radius: 8px;
   font-size: 25px;
   font-family: Title;
   cursor: pointer;
@@ -77,12 +69,11 @@ const LabelBox = styled.label`
 `;
 
 const WriteSharedDiaryButton = styled.button`
-  float: right;
   border: none;
   background-color: rgba(94, 120, 100, 1);
   height: 35px;
   width: 150px;
-  border-radius: 10px;
+  border-radius: 8px;
   font-family: Title;
   font-size: 25px;
   color: white;
@@ -90,23 +81,41 @@ const WriteSharedDiaryButton = styled.button`
 `;
 
 const SharedDiaryList = styled.div`
-  display: inline-block;
-  margin-right: 20px;
-  width: 350px;
-  height: 350px;
+  flex: 0 0 clamp(260px, 80vw, 340px);
+  height: 340px;
   background-color: #61dafb;
-  border-radius: 10px;
+  border-radius: 8px;
   position: relative;
-  background-image: ${props => props.backgroundImage ? `url(${props.backgroundImage})` : 'none'};
+  background-image: ${props => props.$backgroundImage ? `linear-gradient(180deg, rgba(255,255,255,0.84), rgba(255,255,255,0.12) 48%, rgba(0,0,0,0.28)), url(${props.$backgroundImage})` : 'none'};
   background-size: cover;
   background-position: center;
-  padding: 10px;
-  text-align: center;
-  vertical-align: top; /* 리스트가 세로로 정렬되지 않게 조정 */
-  p{
-    margin-left: 220px;
-  }
+  padding: 22px;
+  box-sizing: border-box;
+  vertical-align: top;
   cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.16);
+  }
+
+  h2 {
+    margin: 0;
+    font-family: Title;
+    font-size: 28px;
+    line-height: 1.25;
+    color: #243327;
+    word-break: keep-all;
+  }
+
+  p {
+    margin: 8px 0 0;
+    font-family: Content;
+    font-size: 15px;
+    color: #4d5f52;
+  }
 `;
 
 const SharedDiaryPage = () => {
@@ -160,13 +169,21 @@ const SharedDiaryPage = () => {
                     <ApplicationListButton  onClick={handleApplicationList} >신청 목록</ApplicationListButton>
                 </SearchContainer>
                 <ApplicationContainer>
-                    <LabelBox>진행 중인 공유일기 목록</LabelBox>
-                    <WriteSharedDiaryButton onClick={openModal}>+ 일기장 생성하기</WriteSharedDiaryButton>
-                    <CreateSharedDiaryModal isOpen={isModalOpen} onClose={closeModal} />
+                    <LabelBox>진행 중인 교환일기 목록</LabelBox>
+                    <WriteSharedDiaryButton onClick={openModal}>+ 교환일기 만들기</WriteSharedDiaryButton>
+                    <CreateSharedDiaryModal
+                        isOpen={isModalOpen}
+                        onClose={closeModal}
+                        onCreated={fetchSharedDiaries}
+                    />
                 </ApplicationContainer>
                 <SharedDiaryListContainer>
                     {sharedDiaries.map(diary => (
-                        <SharedDiaryList key={diary.id} backgroundImage={diary.coverImageUrl} onClick={() => handleSharedDiary(diary.id, diary.title)}>
+                        <SharedDiaryList
+                            key={diary.id}
+                            $backgroundImage={getSharedDiaryCoverSrc(diary.coverImageUrl)}
+                            onClick={() => handleSharedDiary(diary.id, diary.title)}
+                        >
                             <h2>{diary.title}</h2>
                             <p>{diary.createdAt}</p>
                         </SharedDiaryList>

@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import {redirect, useLocation} from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import Nav from "../nav/Nav";
 import backgroundImage from '../images/background.png';
-import Cookies from "js-cookie";
 import axios from "axios";
+import { getToken } from '../../authToken';
 import happyImage from '../diary/images/happy.png';
 import neutralImage from '../diary/images/neutral.png';
 import sadImage from '../diary/images/sad.png';
@@ -13,6 +13,8 @@ import notPushLikeImage from '../images/likeFalseButton.png';
 import PushLikeImage from '../images/likeTrueButton.png';
 import commentImage from '../images/commentbutton.png';
 import refreshImage from '../images/refreshbutton.png';
+import { getDiaryImageSrc } from '../../imageAssets';
+import PageContainer from '../../components/layout/PageContainer';
 
 const BackGround = styled.div`
   background-image: url(${backgroundImage});
@@ -25,23 +27,50 @@ const BackGround = styled.div`
   left: 0;
 `;
 
-const Container = styled.div`
-  margin: 0 auto;
-  width: 90%;
-  max-width: 1000px;
-  padding-top: 30px;
-  position: relative;
-  z-index: 1;
-  padding: 20px;
-  box-sizing: border-box;
-  min-height: 100vh;
+const Container = styled(PageContainer).attrs({
+  $maxWidth: '1000px',
+  $padding: '20px',
+  $minHeight: '100vh',
+  $position: 'relative',
+  $zIndex: 1,
+})``;
+
+const HeaderSpacer = styled.div`
+  width: 100%;
+  min-height: 20px;
+`;
+
+const TitleMetaRow = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 16px;
+  margin-top: 30px;
+`;
+
+const TitleBox = styled.div`
+  flex: 1 1 320px;
+  min-height: 30px;
+`;
+
+const DiaryTitle = styled.label`
+  font-family: Title;
+  font-size: 40px;
+`;
+
+const SentimentRow = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  width: 100%;
+  min-height: 40px;
 `;
 
 const ElementDiv = styled.div`
   width: 100px;
-  margin-right: 10px;
   display: inline-block;
   padding: 3px 20px;
+  background-color: ${(props) => props.$backgroundColor};
 `;
 
 const SentimentImage = styled.img`
@@ -69,37 +98,72 @@ const NicknameBox = styled.div`
 `;
 
 const ContentContainer = styled.div`
-  flex-direction: ${(props) => (props.hasImage ? 'row' : 'column')};
+  display: flex;
+  flex-direction: ${(props) => (props.$hasImage ? 'row' : 'column')};
   gap: 20px;
   margin-top: 50px;
   min-height: 300px;
-  max-height: 600px;
+  align-items: flex-start;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+  }
+`;
+
+const StateValue = styled.p`
+  font-family: Content !important;
+  font-size: 18px !important;
+  margin-right: ${(props) => props.$withGap ? '20px' : '0'};
 `;
 
 const ImageWrapper = styled.div`
-  display: inline-block;
-  float: left;
+  flex: 0 1 500px;
   margin: 10px 30px 10px 10px;
-  max-width: 600px;
-  max-height: 300px;
+  max-width: 100%;
+
+  img {
+    display: block;
+    width: 100%;
+    max-width: 500px;
+    height: auto;
+    max-height: 300px;
+    object-fit: contain;
+  }
 `;
 
 const TextWrapper = styled.div`
+  flex: 1;
+  min-width: 0;
   font-family: Content;
   font-size: 20px;
+  overflow-wrap: anywhere;
 `;
 
 const VideoContainer = styled.div`
   margin-top: 30px;
   text-align: center;
+
+  iframe {
+    width: 100%;
+    max-width: 640px;
+    height: 360px;
+  }
+
+  @media (max-width: 768px) {
+    iframe {
+      height: min(56.25vw, 360px);
+    }
+  }
 `;
 
 const RefreshButton = styled.button`
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   width: 130px;
   height: 30px;
-  margin-top: 20px;
-  padding: 6px 0px 20px 30px;
+  padding: 6px 10px;
   background-color: #566e56;
   border: none;
   border-radius: 5px;
@@ -109,10 +173,18 @@ const RefreshButton = styled.button`
 
 `;
 
+const RefreshIcon = styled.img`
+  width: 18px;
+  height: 18px;
+`;
+
 const StateBox = styled.div`
-  width: 40%;
+  flex: 1 1 320px;
   margin-top: 20px;
-  display: inline-block;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
   color : rgba(94, 120, 100, 1);
   p {
     display: inline-block;
@@ -120,33 +192,51 @@ const StateBox = styled.div`
     font-family: Title;
     font-size: 25px;
   }
+
+  @media (max-width: 768px) {
+    justify-content: flex-start;
+  }
 `;
 
 const RecommendBox = styled.div`
   width: 100%;
-  margin-top: 100px;
+  margin-top: 60px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
   
   label {
     font-family: Title;
     font-size: 25px;
     display: block;
+    width: 100%;
   }
 
   p {
     font-family: Content;
-    margin-left: 10px;
-    width: 400px;
-    display: inline-block;
+    margin: 0 0 0 10px;
+    max-width: 400px;
+    flex: 1 1 280px;
   }
+
+`;
+
+const RecommendAction = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  margin: 0 0 30px auto;
 `;
 
 const CommentContainer = styled.div`
-  width: 90%;
+  width: 100%;
   background-color: rgba(235, 243, 236, 1);
   border-radius: 15px;
-  padding: 50px;
+  padding: clamp(24px, 5vw, 50px);
   margin-top: 50px;
   margin-bottom: 100px;
+  box-sizing: border-box;
 
   p {
     display: inline-block;
@@ -155,11 +245,9 @@ const CommentContainer = styled.div`
   }
 `;
 
-const DiaryInfoBox = styled.div``;
-
 const CommentInputBox = styled.textarea`
   background-color: rgba(255, 255, 255, 1);
-  width: 95%;
+  width: 100%;
   height: 80px;
   border: none;
   border-radius: 15px;
@@ -167,6 +255,7 @@ const CommentInputBox = styled.textarea`
   vertical-align: top;
   padding: 20px;
   resize: none;
+  box-sizing: border-box;
 `;
 
 const DiaryCommentBox = styled.div`
@@ -176,6 +265,23 @@ const DiaryCommentBox = styled.div`
 const CommentItem = styled.div`
   margin-bottom: 20px;
   font-family: Content;
+
+  hr {
+    width: 100% !important;
+    max-width: 650px;
+  }
+`;
+
+const CommentContent = styled.div`
+  margin-left: 30px;
+  margin-top: 20px;
+`;
+
+const CommentDivider = styled.hr`
+  width: 100%;
+  max-width: 650px;
+  margin-top: 27px;
+  background-color: rgba(94, 120, 100, 0.8);
 `;
 
 const CommentWriteButton = styled.button`
@@ -186,10 +292,8 @@ const CommentWriteButton = styled.button`
   height: 25px;
   font-family: Content;
   font-size: 14px;
-  float: right;
-  bottom: 40px;
-  right: 20px;
-  position: relative;
+  display: block;
+  margin: 10px 20px 0 auto;
   color: white;
   z-index: 2;
   cursor: pointer;
@@ -208,9 +312,10 @@ const LikeButtonDiv = styled.div`
   cursor: pointer;
   width: 70px;
   height: 25px;
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   font-family: Title;
-  padding-left: 35px;
   font-size: 20px;
   line-height: 1.4;
   margin-right: 10px;
@@ -219,29 +324,69 @@ const LikeButtonDiv = styled.div`
 const CommentButtonDiv = styled.div`
   width: 70px;
   height: 25px;
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   font-family: Title;
-  padding-left: 35px;
   font-size: 22px;
   line-height: 1.3;
   margin-right: 10px;
+`;
+
+const CommentSummaryBar = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+`;
+
+const ActionIcon = styled.img`
+  height: 22px;
+  flex: 0 0 auto;
+`;
+
+const LikeIcon = styled(ActionIcon)`
+  cursor: pointer;
+`;
+
+const AttachmentImage = styled.img`
+  display: block;
+  width: 100%;
+  max-width: 500px;
+  height: auto;
+  max-height: 300px;
+  object-fit: contain;
 `;
 
 
 
 const CommunityDiaryPage = () => {
     const location = useLocation();
-    const { id } = location.state;
+    const { id: routeId } = useParams();
+    const id = routeId || location.state?.id;
     const [diary, setDiary] = useState(null);
-    const [nickname, setNickname] = useState('');
+    const [, setNickname] = useState('');
     const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
     const [comments, setComments] = useState([]);
     const [newComment, setNewComment] = useState('');
     const [isLike, setIsLike] = useState(false);
+    const [error, setError] = useState('');
     const likeImage = isLike?`${PushLikeImage}`:`${notPushLikeImage}`;
 
     useEffect(() => {
-        const token = Cookies.get('token');
+        if (!id) {
+            setError('일기 정보를 찾을 수 없습니다.');
+            return;
+        }
+
+        const token = getToken();
+        if (!token) {
+            setError('로그인이 필요합니다.');
+            return;
+        }
+
+        setError('');
 
         // Fetch diary by date
         axios.get(`/api/get-diary/${id}`, {
@@ -289,7 +434,7 @@ const CommunityDiaryPage = () => {
             },
         })
             .then((response) => {
-                setComments(response.data);
+                setComments(Array.isArray(response.data) ? response.data : []);
             })
             .catch((error) => {
                 console.error('Failed to fetch comments:', error);
@@ -297,42 +442,41 @@ const CommunityDiaryPage = () => {
     }, [id]);
 
     const handleRefresh = () => {
-        if (diary) {
-            if (currentVideoIndex < 3){
-                setCurrentVideoIndex(currentVideoIndex+1);
-            }
-            else{
-                setCurrentVideoIndex(0);
-            }
+        if (diary && keywords.length > 0) {
+            setCurrentVideoIndex((currentVideoIndex + 1) % keywords.length);
         }
     };
 
     const handleCommentSubmit = async () => {
         try {
-            const token = Cookies.get('token');
+            if (!newComment.trim()) {
+                return;
+            }
+
+            const token = getToken();
             const response = await axios.post('/api/create-comment', {
                 diaryId: diary.id,
-                content: newComment
+                content: newComment.trim()
             }, {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }
             });
-            setComments([...comments, response.data]);
+            setComments((prevComments) => [...prevComments, response.data]);
             setNewComment('');
-            window.location.reload(); // 페이지 새로고침
         } catch (error) {
             console.error("Failed to post comment: ", error);
         }
     };
 
+    if (error) return <div>{error}</div>;
     if (!diary) return <div>Loading...</div>;
 
-    const { title, content, weather, negative, positive, neutral, likeNum, confidence, imageUrl, keyword1, keyword2, keyword3, keyword4 } = diary;
+    const { title, content, weather, positive, neutral, likeNum, confidence, imageUrl, keyword1, keyword2, keyword3, keyword4 } = diary;
 
-    const posit = Math.round(positive);
-    const neut = Math.round(neutral);
-    const negat = 100 - posit - neut;
+    const posit = Math.round(positive || 0);
+    const neut = Math.round(neutral || 0);
+    const negat = Math.max(100 - posit - neut, 0);
 
     let todaySentiment = '';
 
@@ -344,20 +488,31 @@ const CommunityDiaryPage = () => {
         todaySentiment = '안 좋은';
     }
 
-    const keywords = [keyword1, keyword2, keyword3, keyword4];
-    const handleLikeSubmit = () => {
+    const keywords = [keyword1, keyword2, keyword3, keyword4]
+        .filter((keyword) => keyword && keyword.trim() !== '');
+    const currentVideoId = keywords.length > 0
+        ? keywords[currentVideoIndex % keywords.length]
+        : null;
+    const diaryImageSrc = getDiaryImageSrc(imageUrl);
+
+    const handleLikeSubmit = async () => {
         try {
-            const token = Cookies.get('token');
-            const response = axios.post('/api/push-like', {
+            const token = getToken();
+            const response = await axios.post('/api/push-like', {
                 diaryId: id
             }, {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }
             });
-            window.location.reload(); // 페이지 새로고침
+            const nextIsLike = response.data;
+            setIsLike(nextIsLike);
+            setDiary((prevDiary) => ({
+                ...prevDiary,
+                likeNum: Math.max((prevDiary.likeNum || 0) + (nextIsLike ? 1 : -1), 0)
+            }));
         } catch (error) {
-            console.error("Failed to post comment: ", error);
+            console.error("Failed to update like: ", error);
         }
     };
 
@@ -367,43 +522,43 @@ const CommunityDiaryPage = () => {
         <BackGround>
             <Nav/>
             <Container>
-                <div style={{width: '100%', height: '20px'}}>
+                <HeaderSpacer>
                     <NicknameBox>{diary.nickname}의 일기</NicknameBox>
-                </div>
-                <div style={{width: '60%', height: '30px', marginTop: '30px',display:"inline-block"}}>
-                    <label style={{fontFamily: 'Title', fontSize: '40px'}}>{title}</label>
-                </div>
-                <StateBox>
+                </HeaderSpacer>
+                <TitleMetaRow>
+                    <TitleBox>
+                        <DiaryTitle>{title}</DiaryTitle>
+                    </TitleBox>
+                    <StateBox>
                     <p>날씨</p>
-                    <p style={{fontFamily:"Content", fontSize:"18px",marginRight:"20px"}}>{weather}</p>
+                    <StateValue $withGap>{weather}</StateValue>
                     <p>날짜</p>
-                    <p style={{fontFamily:"Content", fontSize:"18px"}}>{diary.date}</p>
+                    <StateValue>{diary.date}</StateValue>
                 </StateBox>
-                <div style={{width: '100%', height: '40px'}}>
-                    <ElementDiv style={{backgroundColor:"rgba(179, 246, 202, 1)"}}>
-                        <SentimentImage src={happyImage}></SentimentImage>
+                </TitleMetaRow>
+                <SentimentRow>
+                    <ElementDiv $backgroundColor="rgba(179, 246, 202, 1)">
+                        <SentimentImage src={happyImage} alt="" />
                         <SentimentBox>
                             <label>긍정</label> {posit}%
                         </SentimentBox>
                     </ElementDiv>
-                    <ElementDiv style={{backgroundColor:"rgba(184, 232, 234, 1)"}}>
-                        <SentimentImage src={neutralImage}></SentimentImage>
+                    <ElementDiv $backgroundColor="rgba(184, 232, 234, 1)">
+                        <SentimentImage src={neutralImage} alt="" />
                         <SentimentBox>
                             <label>중립</label> {neut}%
                         </SentimentBox>
                     </ElementDiv>
-                    <ElementDiv style={{backgroundColor:"rgba(124, 157, 132, 1)"}}>
-                        <SentimentImage src={sadImage}></SentimentImage>
+                    <ElementDiv $backgroundColor="rgba(124, 157, 132, 1)">
+                        <SentimentImage src={sadImage} alt="" />
                         <SentimentBox>
                             <label>부정</label> {negat}%
                         </SentimentBox>
                     </ElementDiv>
-                </div>
-                <ContentContainer hasImage={Boolean(imageUrl)}>
-                    <ImageWrapper hasImage={Boolean(imageUrl)}>
-                        {imageUrl && (
-                            <img src={imageUrl} alt="Diary attachment" style={{maxWidth: '500px', maxHeight: '300px'}}/>
-                        )}
+                </SentimentRow>
+                <ContentContainer $hasImage>
+                    <ImageWrapper>
+                        <AttachmentImage src={diaryImageSrc} alt="일기 첨부 이미지" />
                     </ImageWrapper>
                     <TextWrapper>
                         {content ? (
@@ -421,29 +576,31 @@ const CommunityDiaryPage = () => {
                 <RecommendBox>
                     <label>오늘의 추천</label>
                     <p>기분이 {todaySentiment} 날 아래의 동영상을 시청해보는 것이 어떨까요?</p>
-                    <div style={{float:"right", width:"200px", marginTop:"0px", marginBottom:"30px", display:"inline-block"}}>
-                        <img src={refreshImage} style={{marginTop:"25px", marginLeft:"10px", position:"absolute", width:"18px"}}/>
+                    <RecommendAction>
                         <RefreshButton onClick={handleRefresh}>
+                            <RefreshIcon src={refreshImage} alt="" />
                             새로운 동영상 추천
                         </RefreshButton>
-                    </div>
+                    </RecommendAction>
                 </RecommendBox>
                 <VideoContainer>
-                    <YouTube videoId={keywords[currentVideoIndex]}/>
+                    {currentVideoId ? (
+                        <YouTube videoId={currentVideoId}/>
+                    ) : (
+                        <div>추천 영상이 없습니다.</div>
+                    )}
                 </VideoContainer>
                 <CommentContainer>
-                    <div style={{marginBottom:"20px"}}>
-                        <div>
-                            <img onClick={handleLikeSubmit} src={likeImage} style={{height:"22px",position:"absolute", marginTop:"4px", marginLeft:"8px", cursor:"pointer"}}/>
-                        </div>
+                    <CommentSummaryBar>
                         <LikeButtonDiv onClick={handleLikeSubmit}>
+                            <LikeIcon src={likeImage} alt="like" />
                             좋아요 &nbsp;{likeNum}
                         </LikeButtonDiv>
-                        <img src={commentImage} style={{height:"22px",position:"absolute", marginTop:"4px", marginLeft:"8px"}}/>
                         <CommentButtonDiv>
+                            <ActionIcon src={commentImage} alt="" />
                             댓글 &nbsp;{comments.length}
                         </CommentButtonDiv>
-                    </div>
+                    </CommentSummaryBar>
                     <CommentInputBox
                         value={newComment}
                         onChange={(e) => setNewComment(e.target.value)}
@@ -454,8 +611,8 @@ const CommunityDiaryPage = () => {
                         {comments.map((comment, index) => (
                             <CommentItem key={index}>
                                 <CommentNicknameBox>{comment.nickname}</CommentNicknameBox>
-                                <div style={{marginLeft:"30px", marginTop:"20px"}}>{comment.content}</div>
-                                <hr style={{width:"650px", marginTop:"27px", backgroundColor:"rgba(94, 120, 100, 0.8)"}}/>
+                                <CommentContent>{comment.content}</CommentContent>
+                                <CommentDivider />
                             </CommentItem>
                         ))}
                     </DiaryCommentBox>

@@ -1,13 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import axios from 'axios';
 import Nav from "../nav/Nav";
 import styled from "styled-components";
 import Cookies from 'js-cookie';
+import PageContainer from '../../components/layout/PageContainer';
 
-const Container = styled.div`
-  margin: 60px auto;
-  width: 950px;
-`;
+const Container = styled(PageContainer).attrs({
+  $maxWidth: '950px',
+  $margin: '60px auto',
+  $padding: '0 24px 40px',
+})``;
 
 const ApplicationButtonBox = styled.div`
   display: flex;
@@ -25,9 +27,41 @@ const ApplicationButtonBox = styled.div`
   }
 `;
 
+const PageTitle = styled.div`
+  text-align: center;
+  font-family: Title;
+  font-size: 30px;
+`;
+
+const ApplicationTabButton = styled.button`
+  font-family: ${(props) => props.$active ? 'Title' : 'Content'} !important;
+  color: ${(props) => props.$active ? 'black' : 'gray'} !important;
+  border-bottom: ${(props) => props.$active ? '2px solid black' : 'none'} !important;
+  font-size: ${(props) => props.$active ? '25px' : '19px'} !important;
+`;
+
 const ApplicationListBox = styled.div`
   padding: 30px 0px 25px 30px;
   border-bottom: 1px solid rgba(94, 120, 100, 1);
+`;
+
+const ApplicationItem = styled.div`
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+`;
+
+const ApplicationInfo = styled.div`
+  display: inline-block;
+`;
+
+const ApplicationActions = styled.div`
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  flex-wrap: wrap;
 `;
 
 const NicknameBox = styled.label`
@@ -53,8 +87,7 @@ const MessageBox = styled.div`
 `
 
 const AcceptButton = styled.button`
-  float: right;
-    border: none;
+  border: none;
   border-radius: 10px;
   color: white;
   width: 70px;
@@ -68,7 +101,6 @@ const AcceptButton = styled.button`
 `
 
 const RefuseButton = styled.button`
-  float: right;
   border: none;
   border-radius: 10px;
   color: black;
@@ -83,7 +115,6 @@ const RefuseButton = styled.button`
 `
 
 const CancelButton = styled.button`
-  float: right;
   border: none;
   border-radius: 10px;
   color: black;
@@ -102,11 +133,7 @@ const ApplicationList = () => {
     const [activeButton, setActiveButton] = useState("received");
     const [applications, setApplications] = useState([]);
 
-    useEffect(() => {
-        fetchApplications();
-    }, [activeButton]);
-
-    const fetchApplications = async () => {
+    const fetchApplications = useCallback(async () => {
         const token = Cookies.get('token');
         try {
             const response = await axios.get(`/api/shared-diary-applications/${activeButton}`, {
@@ -118,7 +145,11 @@ const ApplicationList = () => {
         } catch (error) {
             console.error('Error fetching applications', error);
         }
-    };
+    }, [activeButton]);
+
+    useEffect(() => {
+        fetchApplications();
+    }, [fetchApplications]);
 
     const handleAccept = async (id) => {
         const token = Cookies.get('token');
@@ -166,37 +197,27 @@ const ApplicationList = () => {
         <div>
             <Nav />
             <Container>
-                <div style={{ textAlign: "center", fontFamily: "Title", fontSize: "30px" }}>
+                <PageTitle>
                     <label>신청 목록</label>
-                </div>
+                </PageTitle>
                 <ApplicationButtonBox>
-                    <button
-                        style={{
-                            fontFamily: activeButton === "received" ? "Title" : "Content",
-                            color: activeButton === "received" ? "black" : "gray",
-                            borderBottom: activeButton === "received" ? "2px solid black" : "none",
-                            fontSize: activeButton === "received" ? "25px" : "19px"
-                        }}
+                    <ApplicationTabButton
+                        $active={activeButton === "received"}
                         onClick={() => setActiveButton("received")}
                     >
                         받은 신청
-                    </button>
-                    <button
-                        style={{
-                            fontFamily: activeButton === "sent" ? "Title" : "Content",
-                            color: activeButton === "sent" ? "black" : "gray",
-                            borderBottom: activeButton === "sent" ? "2px solid black" : "none",
-                            fontSize: activeButton === "sent" ? "25px" : "19px"
-                        }}
+                    </ApplicationTabButton>
+                    <ApplicationTabButton
+                        $active={activeButton === "sent"}
                         onClick={() => setActiveButton("sent")}
                     >
                         보낸 신청
-                    </button>
+                    </ApplicationTabButton>
                 </ApplicationButtonBox>
                 <ApplicationListBox>
                     {applications.map(app => (
-                        <div key={app.id} style={{ marginBottom: '10px'}}>
-                            <div style={{display:"inline-block"}}>
+                        <ApplicationItem key={app.id}>
+                            <ApplicationInfo>
                                 <NicknameBox>
                                     {activeButton === "received" ? app.senderName : app.receiverName}
                                 </NicknameBox>
@@ -206,8 +227,8 @@ const ApplicationList = () => {
                                 <MessageBox>
                                     {app.message}
                                 </MessageBox>
-                            </div>
-                            <div style={{display:"inline-block", float:"right"}}>
+                            </ApplicationInfo>
+                            <ApplicationActions>
                                 {activeButton === "received" && (
                                     <>
                                         <RefuseButton onClick={() => handleRefuse(app.id)}>거절</RefuseButton>
@@ -219,8 +240,8 @@ const ApplicationList = () => {
                                         <CancelButton onClick={() => handleCancel(app.id)}>취소</CancelButton>
                                     </>
                                 )}
-                            </div>
-                        </div>
+                            </ApplicationActions>
+                        </ApplicationItem>
                     ))}
                 </ApplicationListBox>
             </Container>

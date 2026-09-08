@@ -4,9 +4,14 @@ import com.backend.domain.Diary;
 import com.backend.domain.User;
 import com.backend.dto.DiaryDto;
 import com.backend.dto.DiarySentimentDto;
+import com.backend.dto.PublicDiaryListResponse;
 import com.backend.repository.DiaryRepository;
 import com.backend.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import reactor.core.publisher.Mono;
@@ -18,9 +23,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import reactor.core.scheduler.Schedulers;
 
 @Service
 public class DiaryServiceImpl implements DiaryService {
+
+    private static final Logger log = LoggerFactory.getLogger(DiaryServiceImpl.class);
 
     @Autowired
     private DiaryRepository diaryRepository;
@@ -53,7 +61,12 @@ public class DiaryServiceImpl implements DiaryService {
                     Double confidenceNeutral = sentimentResult.getDocument().getConfidence().getNeutral();
 
                     return recommendService.recommendSearchWord(confidencePositive, confidenceNeutral, confidenceNegative)
-                            .map(recommendations -> {
+                            .onErrorResume(error -> {
+                                log.warn("Diary recommendation failed. Saving diary without recommendations: {}", error.getMessage());
+                                return Mono.just(List.of("", "", "", ""));
+                            })
+                            .map(this::safeRecommendations)
+                            .flatMap(recommendations -> Mono.fromCallable(() -> {
                                 Diary diary = new Diary();
                                 diary.setTitle(diaryDto.getTitle());
                                 diary.setWeather(diaryDto.getWeather());
@@ -86,8 +99,23 @@ public class DiaryServiceImpl implements DiaryService {
                                 }
 
                                 return diaryRepository.save(diary);
-                            });
+                            }).subscribeOn(Schedulers.boundedElastic()));
                 });
+    }
+
+    private List<String> safeRecommendations(List<String> recommendations) {
+        List<String> safeValues = new ArrayList<>();
+        if (recommendations != null) {
+            recommendations.stream()
+                    .filter(value -> value != null && !value.trim().isEmpty())
+                    .forEach(safeValues::add);
+        }
+
+        while (safeValues.size() < 4) {
+            safeValues.add("");
+        }
+
+        return safeValues.subList(0, 4);
     }
 
     @Override
@@ -116,7 +144,7 @@ public class DiaryServiceImpl implements DiaryService {
                 diary.getTitle(),
                 diary.getContent(),
                 diary.getUser().getNickname(),
-                diary.getImageUrl()
+                s3Service.createPresignedGetUrl(diary.getImageUrl())
         );
         diaryDto.setDate(diary.getDate());
         diaryDto.setWeather(diary.getWeather());
@@ -144,20 +172,16 @@ public class DiaryServiceImpl implements DiaryService {
                 .stream()
                 .map(diary -> new DiarySentimentDto(diary.getId(),diary.getDate(), diary.getSentiment(), diary.getTitle()
                         , diary.getContent(), diary.getConfidencePositive(), diary.getConfidenceNeutral()
-                        , diary.getConfidenceNegative(), diary.getImageUrl()))
+                        , diary.getConfidenceNegative(), s3Service.createPresignedGetUrl(diary.getImageUrl())))
                 .collect(Collectors.toList());
     }
 
     @Override
-    public List<DiaryDto> getDiariesByPublic() {
-        List<Diary> diaries = diaryRepository.findByIsPrivate(false);
-        List<DiaryDto> diaryDtos = new ArrayList<>();
-        for (Diary diary : diaries) {
-            DiaryDto dto = new DiaryDto(diary.getId(), diary.getTitle(), diary.getContent(), diary.getUser().getNickname(),diary.getImageUrl());
-            diaryDtos.add(dto);
-        }
-
-        return diaryDtos;
+    public Page<PublicDiaryListResponse> getDiariesByPublic(Pageable pageable) {
+        return diaryRepository.findPublicDiaryList(pageable)
+                .map(response -> response.withThumbnailUrl(
+                        s3Service.createPresignedGetUrl(response.getThumbnailUrl())
+                ));
     }
 
     public DiaryDto getDiaryById(Long id){
@@ -168,7 +192,7 @@ public class DiaryServiceImpl implements DiaryService {
                 diary.getTitle(),
                 diary.getContent(),
                 diary.getUser().getNickname(),
-                diary.getImageUrl()
+                s3Service.createPresignedGetUrl(diary.getImageUrl())
         );
         diaryDto.setDate(diary.getDate());
         diaryDto.setWeather(diary.getWeather());
@@ -198,7 +222,7 @@ public class DiaryServiceImpl implements DiaryService {
                         diary.getConfidencePositive(),
                         diary.getConfidenceNeutral(),
                         diary.getConfidenceNegative(),
-                        diary.getImageUrl()
+                        s3Service.createPresignedGetUrl(diary.getImageUrl())
                 ))
                 .collect(Collectors.toList());
     }
@@ -215,7 +239,7 @@ public class DiaryServiceImpl implements DiaryService {
                         diary.getConfidencePositive(),
                         diary.getConfidenceNeutral(),
                         diary.getConfidenceNegative(),
-                        diary.getImageUrl()
+                        s3Service.createPresignedGetUrl(diary.getImageUrl())
                 ))
                 .collect(Collectors.toList());
     }

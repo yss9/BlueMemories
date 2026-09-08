@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import axios from 'axios';
 import Nav from "../nav/Nav";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -11,16 +11,26 @@ import neutralImage from "./image/neutral.png";
 import sadImage from "./image/sad.png";
 import memberImage from "./image/memberImage.png";
 import searchImage from "../images/searchButton.png"
+import { getDiaryImageSrc } from '../../imageAssets';
+import PageContainer from '../../components/layout/PageContainer';
 
-const Container = styled.div`
-  margin: 0 auto;
-  width: 1100px;
-`;
+const Container = styled(PageContainer).attrs({
+  $maxWidth: '1100px',
+  $padding: '0 24px 40px',
+})``;
 
 const Header = styled.div`
-    margin-top: 70px;
+  margin-top: 70px;
   text-align: center;
-  
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+`;
+
+const HeaderIcon = styled.img`
+  width: ${(props) => props.$size || '23px'};
+  margin-right: 8px;
+  vertical-align: middle;
 `;
 
 const TitleBox = styled.div`
@@ -31,12 +41,17 @@ const TitleBox = styled.div`
 
 const SearchContainer = styled.div`
   margin-bottom: 20px;
-  display: inline-block;
+  display: flex;
   justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
   gap: 10px;
-  margin-left: 200px;
+  width: 100%;
+  max-width: 650px;
+
   input {
-    width: 450px;
+    flex: 1 1 260px;
+    min-width: 0;
     height: 20px;
     padding: 8px;
     border-radius: 5px;
@@ -53,8 +68,8 @@ const SearchContainer = styled.div`
 
   button {
     position: relative;
-    top:10px;
-    right: 40px;
+    top: 0;
+    right: 0;
     background-image: url("${searchImage}");
     background-color: transparent;
     background-size: cover;
@@ -71,19 +86,29 @@ const ContentList = styled.div`
 
 const ContentItem = styled.div`
   width: 100%;
-  height: 220px;
+  min-height: 220px;
   margin-bottom: 15px;
   padding:30px 0;
   border-bottom: 1px solid black;
   cursor: pointer;
+  display: flex;
+  gap: 24px;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+  }
 `;
 
 const ImageBox = styled.div`
-  display: inline-block;
-  float:right;
-  width: auto;
-  height: 100%;
+  flex: 0 0 220px;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
   max-width: 100%;
+
+  @media (max-width: 768px) {
+    justify-content: flex-start;
+  }
 `
 
 const ContentImage = styled.img`
@@ -93,23 +118,21 @@ const ContentImage = styled.img`
 `;
 
 const CreateContentButton = styled.button`
-    border: none;
+  border: none;
   background-color: rgba(94, 120, 100, 1);
   color: white;
   border-radius: 10px;
   width: 130px;
   padding: 10px 30px;
-  margin-right: 150px;
   margin-top: 5px;
   font-family: Content;
-  float: right;
   font-size: 15px;
   cursor: pointer;
 `;
 
 const ContentBox = styled.div`
-  display: inline-block;
-    width: 70%;
+  flex: 1;
+  min-width: 0;
   height: 100%;
   
 `
@@ -133,20 +156,20 @@ const Date = styled.div`
   display: inline-block;
   font-family: Content;
   font-size: 15px;
-  float: right;
-  margin-right: 50px;
+  margin-left: 12px;
 `
 const SentimentBox = styled.div`
-  float: right;
   margin-top: -8px;
   background-color: ${(props) => {
-    switch (props.sentiment) {
+    switch (props.$sentiment) {
       case 'positive':
         return 'rgba(179, 246, 202, 1)'; // 예: 긍정적인 감정일 때
       case 'neutral':
         return 'rgba(184, 232, 234, 1)'; // 예: 중립적인 감정일 때
       case 'negative':
         return 'rgba(124, 157, 132, 1)'; // 예: 부정적인 감정일 때
+      default:
+        return 'rgba(124, 157, 132, 1)';
     }
   }};
   padding:10px 0px 8px 20px;
@@ -171,13 +194,18 @@ const Content = styled.div`
   overflow: hidden;
 `
 const JoinMemberBox = styled.div`
-    display: inline-block;
-  margin-left: 200px;
-  position: absolute;
-  width: 120px;
+  display: inline-flex;
+  align-items: center;
+  margin-left: 20px;
+  position: relative;
+  min-width: 120px;
   background-color: rgba(232, 232, 232, 1);
   border-radius: 10px;
 `
+
+const ContentMeta = styled.div`
+  margin-top: 20px;
+`;
 
 const JoinMemberButton = styled.button`
     background-color: transparent;
@@ -216,8 +244,7 @@ const SortSelectBox = styled.div`
 `
 
 const SortSelect = styled.select`
-  float: left;
-    border: 2px solid rgba(232, 232, 232, 1);
+  border: 2px solid rgba(232, 232, 232, 1);
   font-family: Title;
   padding: 5px 20px 5px 10px;
   font-size: 20px;
@@ -263,12 +290,7 @@ const SharedDiaryContentPage = () => {
         }
     }
 
-    useEffect(() => {
-        fetchDiaryContents();
-        fetchDiaryMembers();
-    }, [sortType]); // sortType이 변경될 때마다 fetchDiaryContents를 호출
-
-    const fetchDiaryContents = async () => {
+    const fetchDiaryContents = useCallback(async () => {
         const token = Cookies.get('token'); // 인증 토큰 가져오기
         try {
             const response = await axios.get(`/api/shared-diary-content/${id}/${sortType}`, {
@@ -282,9 +304,9 @@ const SharedDiaryContentPage = () => {
         } finally {
             setLoading(false); // 로딩 완료
         }
-    };
+    }, [id, sortType]);
 
-    const fetchDiaryMembers = async () => {
+    const fetchDiaryMembers = useCallback(async () => {
         const token = Cookies.get('token'); // 인증 토큰 가져오기
         try {
             const response = await axios.get(`/api/shared-diary-members/${id}`, {
@@ -298,7 +320,12 @@ const SharedDiaryContentPage = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [id]);
+
+    useEffect(() => {
+        fetchDiaryContents();
+        fetchDiaryMembers();
+    }, [fetchDiaryContents, fetchDiaryMembers]);
 
     const handleContentWrite = () => {
         navigate('/write-shared-diary', { state: { id: id } });
@@ -366,12 +393,12 @@ const SharedDiaryContentPage = () => {
                 <Header>
                     <TitleBox>{titles}</TitleBox>
                     <JoinMemberBox>
-                        <img src={addMemberImage} style={{ width: "23px", position: "absolute", right: "80px", top: "5px" }} />
+                        <HeaderIcon src={addMemberImage} alt="" />
                         <JoinMemberButton onClick={openModal}>멤버 추가</JoinMemberButton>
                     </JoinMemberBox>
 
                     <MemberListBox>
-                        <img src={memberImage} style={{ width: "22px", position: "absolute", left: "620px", top: "190px" }} />
+                        <HeaderIcon src={memberImage} alt="" $size="22px" />
                         {members.length > 0 && members.map((member, index) => (
                             <p key={index}>
                                 {member}
@@ -387,7 +414,7 @@ const SharedDiaryContentPage = () => {
                                 <option value="content">내용</option>
                                 <option value="nickname">닉네임</option>
                             </SearchSelect>
-                            <input style={{ fontFamily: "Content", height: "23px" }}
+                            <input
                                    type="text"
                                    value={searchQuery}
                                    onChange={(e) => setSearchQuery(e.target.value)}
@@ -413,23 +440,21 @@ const SharedDiaryContentPage = () => {
                                 <ContentItem key={content.id} onClick={() => handleDiaryClick(content.id)}>
                                     <ContentBox>
                                         <Nickname>{content.nickname}</Nickname>
-                                        <div style={{ marginTop: "20px" }}>
+                                        <ContentMeta>
                                             <Title>{content.title}</Title>
-                                            <SentimentBox sentiment={content.sentiment}>
+                                            <SentimentBox $sentiment={content.sentiment}>
                                                 <img
                                                     src={getImageForSentiment(content.confidencePositive, content.confidenceNeutral, content.confidenceNegative)}
-                                                    alt="sentiment image"
+                                                    alt="감정"
                                                 />
                                                 {resultSentiment(content.sentiment, content.confidencePositive, content.confidenceNeutral, content.confidenceNegative)}
                                             </SentimentBox>
                                             <Date>{content.date}</Date>
                                             <Content>{content.content}</Content>
-                                        </div>
+                                        </ContentMeta>
                                     </ContentBox>
                                     <ImageBox>
-                                        {content.imageUrl && (
-                                            <ContentImage src={content.imageUrl} alt="일기 이미지" />
-                                        )}
+                                        <ContentImage src={getDiaryImageSrc(content.imageUrl)} alt="일기 이미지" />
                                     </ImageBox>
                                 </ContentItem>
                             ))}

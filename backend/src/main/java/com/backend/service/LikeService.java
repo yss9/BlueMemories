@@ -9,8 +9,6 @@ import com.backend.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
-
 @Service
 public class LikeService {
 
@@ -25,31 +23,40 @@ public class LikeService {
 
     public boolean checkUserLike(Long diaryId, String userId){
         User user = userRepository.findByUserId(userId);
-        Optional<Diary> optionalDiary = diaryRepository.findById(diaryId);
-        Diary diary = optionalDiary.get();
+        if (user == null) {
+            throw new IllegalArgumentException("User not found: " + userId);
+        }
+
+        Diary diary = diaryRepository.findById(diaryId)
+                .orElseThrow(() -> new IllegalArgumentException("Diary not found: " + diaryId));
         return userLikeRepository.existsByDiaryAndUser(diary, user);
     }
 
     public boolean pushLikeDiary(Long diaryId, String userId){
 
-        Optional<Diary> optionalDiary = diaryRepository.findById(diaryId);
-        Diary diary = optionalDiary.get();
+        Diary diary = diaryRepository.findById(diaryId)
+                .orElseThrow(() -> new IllegalArgumentException("Diary not found: " + diaryId));
         User user = userRepository.findByUserId(userId);
+        if (user == null) {
+            throw new IllegalArgumentException("User not found: " + userId);
+        }
+
+        int currentLikeNum = diary.getLikeNum() == null ? 0 : diary.getLikeNum();
         boolean isPush = userLikeRepository.existsByDiaryAndUser(diary, user);
         if(!isPush){
             UserLikes userLikes = new UserLikes();
             userLikes.setDiary(diary);
             userLikes.setUser(user);
             userLikeRepository.save(userLikes);
-            diary.setLikeNum(diary.getLikeNum()+1);
+            diary.setLikeNum(currentLikeNum + 1);
             diaryRepository.save(diary);
             return true;
         }
         else{
-            Optional<UserLikes> userLikes = userLikeRepository.findByDiaryAndUser(diary, user);
-            UserLikes userLike = userLikes.get();
+            UserLikes userLike = userLikeRepository.findByDiaryAndUser(diary, user)
+                    .orElseThrow(() -> new IllegalStateException("Like not found"));
             userLikeRepository.delete(userLike);
-            diary.setLikeNum(diary.getLikeNum()-1);
+            diary.setLikeNum(Math.max(currentLikeNum - 1, 0));
             diaryRepository.save(diary);
             return false;
         }
