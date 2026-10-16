@@ -185,10 +185,3 @@ BlueMemories/
 │   └── src/pages/               # main, diary, sharedDiary, community, join, nav
 └── docs/images/                 # README 이미지
 ```
-
-## 팀
-
-| 구성원 | 역할 |
-| --- | --- |
-| 서영석 ([@yss9](https://github.com/yss9)) | 기획, 백엔드·프론트엔드 개발 |
-| 디자이너 1인 | UI/UX 디자인 |
